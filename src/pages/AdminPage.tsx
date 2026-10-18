@@ -208,7 +208,7 @@ export const AdminPage: React.FC = () => {
                     resetDemoData();
                   }
                 }}
-                className="px-4 py-2.5 rounded-xl bg-navy-900 hover:bg-gold-500 hover:text-navy-950 border border-navy-700 text-sand-300 font-bold text-xs flex items-center gap-2 transition-colors"
+                className="px-4 py-2.5 rounded-xl bg-navy-900 hover:bg-rose-900/60 border border-navy-700 text-rose-300 hover:text-white font-bold text-xs flex items-center gap-2 transition-colors"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span>{language === 'ar' ? 'استعادة البيانات الافتراضية' : 'Reset Demo Data'}</span>

@@ -110,10 +110,10 @@ export const UserAccountPage: React.FC = () => {
             </div>
 
             {/* Profile Action Buttons */}
-            <div className="flex items-center gap-2.5 flex-wrap">
+            <div className="flex items-center gap-3 flex-wrap">
               <button
                 onClick={() => setIsEditingProfile(!isEditingProfile)}
-                className="px-3.5 py-2 rounded-xl border border-sand-300 hover:border-gold-500 text-navy-800 text-xs font-bold transition-colors flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl border border-sand-300 hover:border-gold-500 text-navy-800 text-xs font-bold transition-colors flex items-center gap-1.5"
               >
                 <Edit2 className="w-3.5 h-3.5" />
                 <span>{language === 'ar' ? 'تعديل البيانات' : 'Edit Profile'}</span>
@@ -122,7 +122,7 @@ export const UserAccountPage: React.FC = () => {
               {isAuthenticated ? (
                 <button
                   onClick={logout}
-                  className="px-3.5 py-2 rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-bold transition-colors flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-bold transition-colors flex items-center gap-1.5"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>{language === 'ar' ? 'تسجيل الخروج' : 'Sign Out'}</span>
@@ -130,7 +130,7 @@ export const UserAccountPage: React.FC = () => {
               ) : (
                 <Link
                   to="/login"
-                  className="px-3.5 py-2 rounded-xl bg-gold-500 hover:bg-gold-600 text-navy-950 text-xs font-bold transition-colors flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-xl bg-gold-500 hover:bg-gold-600 text-navy-950 text-xs font-bold transition-colors flex items-center gap-1.5"
                 >
                   <LogIn className="w-3.5 h-3.5" />
                   <span>{language === 'ar' ? 'تسجيل الدخول' : 'Sign In'}</span>
@@ -142,18 +142,18 @@ export const UserAccountPage: React.FC = () => {
                   if (
                     window.confirm(
                       language === 'ar'
-                        ? 'هل تريد استعادة البيانات الافتراضية لمنصة بورسعيد ومسح التعديلات المحلية؟'
-                        : 'Reset demo data to default Port Said seeded properties?'
+                        ? 'هل تريد استعادة البيانات الافتراضية للمنصة ومسح التعديلات المحلية؟'
+                        : 'Reset demo data to default seeded properties?'
                     )
                   ) {
                     resetDemoData();
                   }
                 }}
-                className="px-3.5 py-2 rounded-xl text-navy-600 hover:bg-sand-100 border border-sand-200 text-xs font-bold transition-colors flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl text-rose-700 hover:bg-rose-50 border border-rose-200 text-xs font-bold transition-colors flex items-center gap-1.5"
                 title="Reset demo data"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>{language === 'ar' ? 'استعادة البيانات' : 'Reset'}</span>
+                <span>{language === 'ar' ? 'استعادة البيانات الافتراضية' : 'Reset Demo'}</span>
               </button>
             </div>
           </div>

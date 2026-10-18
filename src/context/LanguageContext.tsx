@@ -16,9 +16,9 @@ const translations: Record<Language, Record<string, string>> = {
     // Brand & Navigation
     'brand.name': 'الحمد',
     'brand.fullName': 'الحمد للتسويق والاستثمار العقاري والقانوني',
-    'brand.tagline': 'للتسويق والاستثمار العقاري والقانوني - بورسعيد',
+    'brand.tagline': 'العقارات والاستثمار في بورسعيد',
     'nav.home': 'الرئيسية',
-    'nav.properties': 'عقارات بورسعيد',
+    'nav.properties': 'العقارات',
     'nav.submitProperty': 'أضف عقارك',
     'nav.legalServices': 'الخدمات القانونية',
     'nav.investmentShares': 'حصص الاستثمار',
@@ -28,7 +28,7 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.logout': 'تسجيل الخروج',
     
     // Actions & Buttons
-    'action.search': 'بحث في بورسعيد',
+    'action.search': 'بحث',
     'action.filter': 'تصفية النتائج',
     'action.reset': 'إعادة ضبط',
     'action.viewDetails': 'تفاصيل العقار',
@@ -52,8 +52,8 @@ const translations: Record<Language, Record<string, string>> = {
     'filter.forSale': 'للبيع',
     'filter.forRent': 'للإيجار',
     'filter.propertyType': 'نوع العقار',
-    'filter.location': 'الحي / المنطقة في بورسعيد',
-    'filter.priceRange': 'نطاق السعر (ج.م)',
+    'filter.location': 'المدينة أو الحي',
+    'filter.priceRange': 'نطاق السعر',
     'filter.minPrice': 'السعر الأدنى',
     'filter.maxPrice': 'السعر الأقصى',
     'filter.bedrooms': 'غرف النوم',
@@ -62,7 +62,7 @@ const translations: Record<Language, Record<string, string>> = {
     'filter.priceAsc': 'السعر: من الأقل للأعلى',
     'filter.priceDesc': 'السعر: من الأعلى للأقل',
     'filter.areaDesc': 'المساحة: الأكبر أولاً',
-    'filter.searchPlaceholder': 'ابحث باسم الشارع، الحي، أو نوع العقار ببورسعيد...',
+    'filter.searchPlaceholder': 'ابحث بالحي، اسم الشارع، أو نوع العقار...',
     
     // Property Specs
     'specs.area': 'المساحة',
@@ -72,7 +72,7 @@ const translations: Record<Language, Record<string, string>> = {
     'specs.finishing': 'نوع التشطيب',
     'specs.yearBuilt': 'سنة البناء',
     'specs.amenities': 'المزايا والمرافق',
-    'specs.location': 'الموقع في بورسعيد',
+    'specs.location': 'الموقع والعنوان',
     'specs.contactInfo': 'بيانات التواصل مع المعلن',
     
     // Status
@@ -81,42 +81,42 @@ const translations: Record<Language, Record<string, string>> = {
     'status.rejected': 'مرفوض',
     
     // Home Hero
-    'hero.badge': 'منصة العقارات والاستثمار الأولى في محافظة بورسعيد',
-    'hero.title': 'اعثر على عقارك المثالي في بورسعيد وبورفؤاد بكل ثقة وأمان',
-    'hero.subtitle': 'استكشف أفضل الشقق السكنية، المحلات التجارية، المقرات الإدارية، والفلل في حي الشرق، العرب، المناخ، الضواحي، الزهور، وبورفؤاد مع دعم قانوني متخصص وتدقيق كامل للمستندات.',
+    'hero.badge': 'بوابتك الذكية لتملك العقارات',
+    'hero.title': 'اعثر على عقارك المثالي بثقة وأمان كامل',
+    'hero.subtitle': 'تصفح باقة مختارة من أرقى الشقق، الفلل، والمحلات التجارية والمكاتب الإدارية مع دعم قانوني متخصص وفرص استثمارية واعدة.',
     
     // Common Headings
-    'heading.featuredProperties': 'عقارات مميزة في بورسعيد',
-    'heading.featuredSubtitle': 'تشكيلة مختارة بعناية من أفضل الفرص السكنية والتجارية في أحياء بورسعيد وبورفؤاد',
-    'heading.exploreServices': 'منظومة خدمات الحمد العقارية والقانونية',
-    'heading.exploreSubtitle': 'تسويق، استثمار، وتدقيق قانوني شامل لصفقتك العقارية ببورسعيد',
-    'heading.investmentSharesTeaser': 'حصص الاستثمار التجاري في بورسعيد',
-    'heading.investmentSharesSubtitle': 'استثمر في عقارات تجارية ومقرات بنوك وخدمات ملاحية بعوائد دورية مجزية',
-    'heading.legalServicesTeaser': 'حماية قانونية كاملة لعقارات بورسعيد',
-    'heading.legalServicesSubtitle': 'فحص سندات الملكية، عقود البيع والشراء، وإجراءات الشهر العقاري والتراخيص',
+    'heading.featuredProperties': 'عقارات مميزة ومختارة',
+    'heading.featuredSubtitle': 'تشكيلة مختارة بعناية من أفضل الفرص السكنية والتجارية',
+    'heading.exploreServices': 'منظومة خدمات الحمد المتكاملة',
+    'heading.exploreSubtitle': 'كل ما تحتاجه لاتخاذ قرار عقاري استثماري سليم في مكان واحد',
+    'heading.investmentSharesTeaser': 'نموذج الاستثمار العقاري الجزئي',
+    'heading.investmentSharesSubtitle': 'ابدأ الاستثمار في عقارات تجارية وإدارية عالية العائد بحصص مالية ميسرة',
+    'heading.legalServicesTeaser': 'حماية قانونية متكاملة لصفقتك العقارية',
+    'heading.legalServicesSubtitle': 'نساعدك على فحص الملكية، وصياغة العقود، وإتمام إجراءات الشهر العقاري بأمان تام',
     
     // Disclaimer
-    'disclaimer.prototype': 'نسخة تجريبية (MVP) مخصصة لمحافظة بورسعيد وتعمل بالكامل محلياً (localStorage).',
-    'disclaimer.legal': 'الاستشارات القانونية المعروضة هي إرشادية وتوضيحية للمنصة ولا تغني عن التوكيل الرسمي أمام الجهات القضائية.',
-    'disclaimer.investment': 'نموذج حصص الاستثمار هو نموذج توضيحي فقط. المنصة لا تجمع أموالاً عبر الإنترنت.',
+    'disclaimer.prototype': 'نسخة تجريبية (MVP) مخصصة للعرض والعروض التوضيحية وتعمل بالكامل محلياً (localStorage).',
+    'disclaimer.legal': 'جميع المعلومات والخدمات الاستشارية المعروضة على المنصة هي استرشادية وتوضيحية ولا تغني عن الاستشارة القانونية الرسمية.',
+    'disclaimer.investment': 'نموذج حصص الاستثمار هو نموذج تصوري وعرض توضيحي فقط. المنصة لا تقدم وعوداً مالية ولا تجمع أموالاً عبر الإنترنت.',
     
     // Footer
-    'footer.description': 'مكتب الحمد للتسويق والاستثمار العقاري والقانوني — شريككم العقاري الموثوق في محافظة بورسعيد ومدينة بورفؤاد.',
+    'footer.description': 'المنصة الرائدة في تسويق وإدارة العقارات والاستثمار والخدمات القانونية.',
     'footer.quickLinks': 'روابط سريعة',
     'footer.services': 'خدماتنا',
-    'footer.contactUs': 'تواصل معنا في بورسعيد',
-    'footer.address': 'شارع الجمهورية تقاطع عاطف السادات، حي الشرق، بورسعيد، مصر',
+    'footer.contactUs': 'تواصل معنا',
+    'footer.address': 'شارع الجمهورية تقاطع عاطف السادات، بورسعيد، مصر',
     'footer.phone': '+20 66 320 0000 / +20 100 123 4567',
     'footer.email': 'info@elhamd-realestate.com',
-    'footer.rights': 'جميع الحقوق محفوظة © الحمد للتسويق والاستثمار العقاري والقانوني - بورسعيد',
+    'footer.rights': 'جميع الحقوق محفوظة © الحمد للتسويق والاستثمار العقاري والقانوني',
   },
   en: {
     // Brand & Navigation
     'brand.name': 'El-Hamd',
     'brand.fullName': 'El-Hamd Real Estate, Investment & Legal Services',
-    'brand.tagline': 'Real Estate, Investment & Legal Services - Port Said',
+    'brand.tagline': 'Real Estate & Investment in Port Said',
     'nav.home': 'Home',
-    'nav.properties': 'Port Said Properties',
+    'nav.properties': 'Properties',
     'nav.submitProperty': 'List Property',
     'nav.legalServices': 'Legal Services',
     'nav.investmentShares': 'Investment Shares',
@@ -126,14 +126,14 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.logout': 'Sign Out',
     
     // Actions & Buttons
-    'action.search': 'Search in Port Said',
+    'action.search': 'Search',
     'action.filter': 'Filter Results',
     'action.reset': 'Reset',
     'action.viewDetails': 'View Details',
     'action.expressInterest': 'Express Interest',
     'action.contactWhatsApp': 'Chat on WhatsApp',
     'action.callNow': 'Call Now',
-    'action.submit': 'Submit Listing',
+    'action.submit': 'Submit',
     'action.cancel': 'Cancel',
     'action.close': 'Close',
     'action.approve': 'Approve & Publish',
@@ -142,7 +142,7 @@ const translations: Record<Language, Record<string, string>> = {
     'action.edit': 'Edit',
     'action.save': 'Save Changes',
     'action.reserveShares': 'Express Share Interest',
-    'action.requestConsultation': 'Request Legal Advice',
+    'action.requestConsultation': 'Request Legal Consultation',
     'action.resetDemoData': 'Reset Demo Data',
     
     // Filters & Labels
@@ -150,8 +150,8 @@ const translations: Record<Language, Record<string, string>> = {
     'filter.forSale': 'For Sale',
     'filter.forRent': 'For Rent',
     'filter.propertyType': 'Property Type',
-    'filter.location': 'Port Said District',
-    'filter.priceRange': 'Price Range (EGP)',
+    'filter.location': 'City or District',
+    'filter.priceRange': 'Price Range',
     'filter.minPrice': 'Min Price',
     'filter.maxPrice': 'Max Price',
     'filter.bedrooms': 'Bedrooms',
@@ -160,7 +160,7 @@ const translations: Record<Language, Record<string, string>> = {
     'filter.priceAsc': 'Price: Low to High',
     'filter.priceDesc': 'Price: High to Low',
     'filter.areaDesc': 'Area: Largest First',
-    'filter.searchPlaceholder': 'Search by street, district or property type...',
+    'filter.searchPlaceholder': 'Search by district, compound, or property type...',
     
     // Property Specs
     'specs.area': 'Area',
@@ -170,8 +170,8 @@ const translations: Record<Language, Record<string, string>> = {
     'specs.finishing': 'Finishing',
     'specs.yearBuilt': 'Year Built',
     'specs.amenities': 'Amenities & Features',
-    'specs.location': 'Port Said Location',
-    'specs.contactInfo': 'Advertiser Contact',
+    'specs.location': 'Location & Address',
+    'specs.contactInfo': 'Contact Information',
     
     // Status
     'status.pending': 'Pending Review',
@@ -179,34 +179,34 @@ const translations: Record<Language, Record<string, string>> = {
     'status.rejected': 'Rejected',
     
     // Home Hero
-    'hero.badge': 'The Premier Real Estate & Legal Platform in Port Said',
-    'hero.title': 'Discover Exceptional Properties in Port Said & Port Fouad',
-    'hero.subtitle': 'Explore premium apartments, retail shops, maritime offices, and villas across El Shark, El Arab, El Manakh, El Dawahi, El Zohour, and Port Fouad with certified legal due diligence.',
+    'hero.badge': 'Your Gateway to Smart Real Estate',
+    'hero.title': 'Find Your Dream Property with Complete Confidence',
+    'hero.subtitle': 'Explore premium apartments, villas, and commercial shops across Port Said with full legal backing and fractional investment opportunities.',
     
     // Common Headings
-    'heading.featuredProperties': 'Featured Listings in Port Said',
-    'heading.featuredSubtitle': 'Handpicked residential and commercial opportunities across Port Said governorate',
-    'heading.exploreServices': 'El-Hamd Comprehensive Real Estate Ecosystem',
-    'heading.exploreSubtitle': 'Marketing, fractional investments, and legal contract auditing under one roof',
-    'heading.investmentSharesTeaser': 'Port Said Commercial Investment Shares',
-    'heading.investmentSharesSubtitle': 'Fractional ownership in prime retail, medical, and maritime logistics assets',
-    'heading.legalServicesTeaser': 'Legal Security for Port Said Real Estate',
-    'heading.legalServicesSubtitle': 'Title deed audits, notary registration, and contract drafting in Port Said',
+    'heading.featuredProperties': 'Featured Properties',
+    'heading.featuredSubtitle': 'Handpicked premium residential and commercial opportunities',
+    'heading.exploreServices': 'El-Hamd Comprehensive Ecosystem',
+    'heading.exploreSubtitle': 'Everything you need to make confident, profitable property decisions',
+    'heading.investmentSharesTeaser': 'Fractional Real Estate Investment',
+    'heading.investmentSharesSubtitle': 'Invest in high-yield commercial & office real estate through accessible fractional shares',
+    'heading.legalServicesTeaser': 'Complete Legal Protection for Your Deal',
+    'heading.legalServicesSubtitle': 'Title deed audits, contract drafting, and notary registration handled safely',
     
     // Disclaimer
-    'disclaimer.prototype': 'Port Said Edition MVP Prototype running locally with localStorage.',
+    'disclaimer.prototype': 'Interactive Prototype (MVP) running entirely client-side with localStorage persistence.',
     'disclaimer.legal': 'All legal information is informational and does not constitute formal legal counsel.',
     'disclaimer.investment': 'Investment shares are a conceptual demonstration only. No payments are processed online.',
     
     // Footer
-    'footer.description': 'El-Hamd Real Estate Marketing, Investment & Legal Services — Your trusted property partner in Port Said and Port Fouad.',
+    'footer.description': 'Premier platform for luxury real estate marketing, advisory, and fractional investments.',
     'footer.quickLinks': 'Quick Links',
     'footer.services': 'Services',
-    'footer.contactUs': 'Contact Us in Port Said',
-    'footer.address': 'El Gomhoureya St at Atef El Sadat, El Shark, Port Said, Egypt',
+    'footer.contactUs': 'Contact Us',
+    'footer.address': 'El Gomhoureya St at Atef El Sadat, Port Said, Egypt',
     'footer.phone': '+20 66 320 0000 / +20 100 123 4567',
     'footer.email': 'info@elhamd-realestate.com',
-    'footer.rights': 'All rights reserved © El-Hamd Real Estate - Port Said',
+    'footer.rights': 'All rights reserved © El-Hamd Real Estate & Legal Services',
   }
 };
 

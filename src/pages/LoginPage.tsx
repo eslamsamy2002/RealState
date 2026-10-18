@@ -1,24 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { useAuth, DEFAULT_ADMIN, DEFAULT_DEMO_USER } from '../context/AuthContext';
+import { useAuth, DEFAULT_ADMIN } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import {
   Lock,
   Mail,
   User,
   Phone,
-  ShieldCheck,
-  KeyRound,
   ArrowRight,
   ArrowLeft,
   CheckCircle2,
   AlertCircle,
-  Sparkles,
-  Building2,
 } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
-  const { login, register, isAuthenticated, isAdmin, currentUser, logout } = useAuth();
+  const { login, register, isAuthenticated, currentUser, logout } = useAuth();
   const { language, isRTL } = useLanguage();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -28,7 +24,7 @@ export const LoginPage: React.FC = () => {
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
 
-  // Login form state
+  // Login form state — completely empty on page load
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
 
@@ -49,13 +45,12 @@ export const LoginPage: React.FC = () => {
     setError('');
     const res = login(loginEmail, loginPassword);
     if (!res.success) {
-      setError(res.error || 'فشل تسجيل الدخول.');
+      setError(res.error || (language === 'ar' ? 'فشل تسجيل الدخول. يرجى التحقق من البيانات.' : 'Login failed. Please check credentials.'));
       return;
     }
 
     setSuccess(language === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Logged in successfully!');
     setTimeout(() => {
-      // Determine redirection based on role or param
       if (loginEmail.toLowerCase() === DEFAULT_ADMIN.email.toLowerCase()) {
         navigate(redirectPath || '/admin');
       } else {
@@ -69,7 +64,7 @@ export const LoginPage: React.FC = () => {
     setError('');
     const res = register(regName, regEmail, regPhone, regPassword);
     if (!res.success) {
-      setError(res.error || 'فشل إنشاء الحساب.');
+      setError(res.error || (language === 'ar' ? 'فشل إنشاء الحساب.' : 'Registration failed.'));
       return;
     }
 
@@ -79,49 +74,29 @@ export const LoginPage: React.FC = () => {
     }, 600);
   };
 
-  // Quick fill demo administrator account
-  const handleQuickFillAdmin = () => {
-    setMode('login');
-    setLoginEmail(DEFAULT_ADMIN.email);
-    setLoginPassword(DEFAULT_ADMIN.password || '');
-    setError('');
-  };
-
-  // Quick fill demo regular user account
-  const handleQuickFillDemoUser = () => {
-    setMode('login');
-    setLoginEmail(DEFAULT_DEMO_USER.email);
-    setLoginPassword(DEFAULT_DEMO_USER.password || '');
-    setError('');
-  };
-
   return (
     <div className="min-h-screen bg-sand-50 py-12 flex items-center justify-center">
       <div className="max-w-md w-full mx-auto px-4 sm:px-6">
-        {/* Brand Header */}
+        {/* Brand Header with current logo */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-block group mb-4">
-            <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-gold-500 shadow-xl group-hover:scale-105 transition-transform bg-navy-950">
+          <Link to="/" className="inline-block group mb-3">
+            <div className="w-16 h-16 mx-auto rounded-full overflow-hidden border-2 border-gold-400/80 shadow-md group-hover:scale-105 transition-transform bg-navy-950">
               <img
                 src="/logo.jpg"
-                alt="الحمد للتسويق والاستثمار العقاري والقانوني - بورسعيد"
+                alt="الحمد للتسويق والاستثمار العقاري"
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  // graceful fallback
-                  (e.target as HTMLElement).style.display = 'none';
-                }}
               />
             </div>
           </Link>
           <h1 className="text-xl sm:text-2xl font-black text-navy-950">
             {language === 'ar' ? 'الحمد للتسويق والاستثمار العقاري' : 'El-Hamd Real Estate'}
           </h1>
-          <p className="text-xs text-gold-700 font-bold mt-1">
-            {language === 'ar' ? 'بورسعيد • بورفؤاد' : 'Port Said • Port Fouad'}
+          <p className="text-xs text-navy-500 font-medium mt-1">
+            {language === 'ar' ? 'العقارات والاستثمار والخدمات القانونية' : 'Real Estate, Investment & Legal Services'}
           </p>
         </div>
 
-        {/* If already authenticated, show status card */}
+        {/* If already authenticated, show user status card */}
         {isAuthenticated && currentUser ? (
           <div className="bg-white rounded-3xl border border-sand-200 p-8 shadow-card text-center space-y-4">
             <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto">
@@ -211,9 +186,9 @@ export const LoginPage: React.FC = () => {
               </div>
             )}
 
-            {/* Login Form */}
+            {/* Login Form: Both fields empty when page loads */}
             {mode === 'login' ? (
-              <form onSubmit={handleLoginSubmit} className="space-y-4">
+              <form onSubmit={handleLoginSubmit} className="space-y-4" autoComplete="off">
                 <div>
                   <label className="block text-xs font-bold text-navy-700 mb-1.5">
                     {language === 'ar' ? 'البريد الإلكتروني *' : 'Email Address *'}
@@ -222,9 +197,10 @@ export const LoginPage: React.FC = () => {
                     <input
                       type="email"
                       required
+                      autoComplete="off"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
-                      placeholder="admin@darestate.local"
+                      placeholder={language === 'ar' ? 'أدخل البريد الإلكتروني' : 'Enter email address'}
                       className="w-full px-3 py-2.5 rounded-xl border border-sand-300 text-xs text-navy-900 focus:outline-none focus:ring-2 focus:ring-gold-500/50"
                       dir="ltr"
                     />
@@ -240,6 +216,7 @@ export const LoginPage: React.FC = () => {
                     <input
                       type="password"
                       required
+                      autoComplete="new-password"
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
                       placeholder="••••••••"
@@ -255,14 +232,14 @@ export const LoginPage: React.FC = () => {
                     type="submit"
                     className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-navy-950 font-black text-xs sm:text-sm shadow-md shadow-gold-500/20 transition-all flex items-center justify-center gap-2"
                   >
-                    <span>{language === 'ar' ? 'دخول' : 'Sign In'}</span>
+                    <span>{language === 'ar' ? 'تسجيل الدخول' : 'Sign In'}</span>
                     <ArrowIcon className="w-4 h-4" />
                   </button>
                 </div>
               </form>
             ) : (
               /* Register Form */
-              <form onSubmit={handleRegisterSubmit} className="space-y-4">
+              <form onSubmit={handleRegisterSubmit} className="space-y-4" autoComplete="off">
                 <div>
                   <label className="block text-xs font-bold text-navy-700 mb-1.5">
                     {language === 'ar' ? 'الاسم الكامل *' : 'Full Name *'}
@@ -271,9 +248,10 @@ export const LoginPage: React.FC = () => {
                     <input
                       type="text"
                       required
+                      autoComplete="off"
                       value={regName}
                       onChange={(e) => setRegName(e.target.value)}
-                      placeholder="مثال: محمد السيد البورسعيدي"
+                      placeholder={language === 'ar' ? 'مثال: محمد السيد' : 'e.g. John Doe'}
                       className="w-full px-3 py-2.5 rounded-xl border border-sand-300 text-xs text-navy-900 focus:outline-none focus:ring-2 focus:ring-gold-500/50"
                     />
                     <User className="w-4 h-4 text-navy-400 absolute start-3 top-3 pointer-events-none" />
@@ -288,6 +266,7 @@ export const LoginPage: React.FC = () => {
                     <input
                       type="email"
                       required
+                      autoComplete="off"
                       value={regEmail}
                       onChange={(e) => setRegEmail(e.target.value)}
                       placeholder="user@example.com"
@@ -305,6 +284,7 @@ export const LoginPage: React.FC = () => {
                   <div className="relative">
                     <input
                       type="tel"
+                      autoComplete="off"
                       value={regPhone}
                       onChange={(e) => setRegPhone(e.target.value)}
                       placeholder="010XXXXXXXX"
@@ -323,6 +303,7 @@ export const LoginPage: React.FC = () => {
                     <input
                       type="password"
                       required
+                      autoComplete="new-password"
                       value={regPassword}
                       onChange={(e) => setRegPassword(e.target.value)}
                       placeholder="••••••••"
@@ -338,57 +319,12 @@ export const LoginPage: React.FC = () => {
                     type="submit"
                     className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-navy-950 font-black text-xs sm:text-sm shadow-md shadow-gold-500/20 transition-all flex items-center justify-center gap-2"
                   >
-                    <span>{language === 'ar' ? 'إنشاء حساب وتسجيل الدخول' : 'Register & Sign In'}</span>
+                    <span>{language === 'ar' ? 'إنشاء حساب جديد' : 'Create Account'}</span>
                     <ArrowIcon className="w-4 h-4" />
                   </button>
                 </div>
               </form>
             )}
-
-            {/* Quick Demo Test Box */}
-            <div className="pt-4 border-t border-sand-200 space-y-2.5">
-              <span className="text-[11px] font-bold text-navy-500 block uppercase tracking-wider text-center">
-                {language === 'ar' ? 'بيانات الحسابات التجريبية السريعة (للفحص)' : 'Quick Demo Credentials for Testing'}
-              </span>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {/* Admin Quick Fill */}
-                <button
-                  type="button"
-                  onClick={handleQuickFillAdmin}
-                  className="p-2.5 rounded-xl border border-gold-400/60 bg-gold-50/70 hover:bg-gold-100 text-start transition-colors"
-                >
-                  <div className="flex items-center gap-1.5 text-xs font-black text-navy-950 mb-0.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-gold-600" />
-                    <span>{language === 'ar' ? 'حساب المسؤول (Admin)' : 'Admin Demo'}</span>
-                  </div>
-                  <p className="text-[10px] text-navy-600 font-mono truncate" dir="ltr">
-                    admin@darestate.local
-                  </p>
-                  <span className="text-[10px] text-gold-800 font-mono block">
-                    Pass: Admin123!Temp
-                  </span>
-                </button>
-
-                {/* User Quick Fill */}
-                <button
-                  type="button"
-                  onClick={handleQuickFillDemoUser}
-                  className="p-2.5 rounded-xl border border-sand-300 bg-sand-50 hover:bg-sand-100 text-start transition-colors"
-                >
-                  <div className="flex items-center gap-1.5 text-xs font-black text-navy-950 mb-0.5">
-                    <User className="w-3.5 h-3.5 text-navy-600" />
-                    <span>{language === 'ar' ? 'حساب مستخدم عادي' : 'User Demo'}</span>
-                  </div>
-                  <p className="text-[10px] text-navy-600 font-mono truncate" dir="ltr">
-                    ahmed@elhamd.local
-                  </p>
-                  <span className="text-[10px] text-navy-500 font-mono block">
-                    Pass: User123!Temp
-                  </span>
-                </button>
-              </div>
-            </div>
           </div>
         )}
       </div>
