@@ -1,12 +1,14 @@
 export const STORAGE_KEYS = {
-  PROPERTIES: 'darestate_properties_v1',
-  INQUIRIES: 'darestate_inquiries_v1',
-  LEGAL_SERVICES: 'darestate_legal_services_v1',
-  LEGAL_REQUESTS: 'darestate_legal_requests_v1',
-  INVESTMENTS: 'darestate_investments_v1',
-  INVESTMENT_INQUIRIES: 'darestate_investment_inquiries_v1',
-  USER_PROFILE: 'darestate_user_profile_v1',
-  LANGUAGE: 'darestate_language_v1',
+  PROPERTIES: 'elhamd_properties_v2',
+  INQUIRIES: 'elhamd_inquiries_v2',
+  LEGAL_SERVICES: 'elhamd_legal_services_v2',
+  LEGAL_REQUESTS: 'elhamd_legal_requests_v2',
+  INVESTMENTS: 'elhamd_investments_v2',
+  INVESTMENT_INQUIRIES: 'elhamd_investment_inquiries_v2',
+  USER_PROFILE: 'elhamd_user_profile_v2',
+  LANGUAGE: 'elhamd_language_v2',
+  AUTH_SESSION: 'elhamd_auth_session_v2',
+  REGISTERED_USERS: 'elhamd_registered_users_v2',
 };
 
 export function getFromStorage<T>(key: string, defaultValue: T): T {

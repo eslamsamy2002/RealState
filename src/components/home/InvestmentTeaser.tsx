@@ -55,8 +55,8 @@ export const InvestmentTeaser: React.FC = () => {
 
             <p className="text-sm text-sand-300 leading-relaxed">
               {language === 'ar'
-                ? 'نموذج توضيحي يُمكّن صغار المستثمرين من تملك حصص بعقارات تجارية وإدارية مؤجرة لكيانات دولية وبنوك في التجمع الخامس والشيخ زايد، والحصول على عوائد إيجارية دورية.'
-                : 'A demo showcase enabling investors to acquire fractional ownership shares in premium commercial properties leased to multinational tenants and banks, generating periodic rental distributions.'}
+                ? 'نموذج توضيحي يُمكّن صغار المستثمرين من تملك حصص بعقارات تجارية وإدارية وملاحية مؤجرة لكيانات دولية وبنوك في حي العرب وحي الشرق وبورفؤاد، والحصول على عوائد إيجارية دورية.'
+                : 'A demo showcase enabling investors to acquire fractional ownership shares in prime commercial and maritime properties in Port Said & Port Fouad with periodic rental distributions.'}
             </p>
 
             {/* Value bullets */}

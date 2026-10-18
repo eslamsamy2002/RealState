@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { Property, ListingStatus, LegalService } from '../types';
+import { PORT_SAID_DISTRICTS } from '../data/portSaidLocations';
 import { formatPrice, formatDate, getPropertyTypeLabel, getPurposeLabel } from '../utils/formatters';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { Modal } from '../components/common/Modal';
@@ -26,6 +28,7 @@ import {
   Mail,
   User,
   Plus,
+  LogOut,
 } from 'lucide-react';
 
 export const AdminPage: React.FC = () => {
@@ -51,6 +54,7 @@ export const AdminPage: React.FC = () => {
   } = useData();
 
   const { language } = useLanguage();
+  const { currentUser, logout } = useAuth();
 
   // Active Admin Sub-tab
   const [activeTab, setActiveTab] = useState<
@@ -62,7 +66,7 @@ export const AdminPage: React.FC = () => {
 
   // Rejection Modal State
   const [rejectingPropertyId, setRejectingPropertyId] = useState<string | null>(null);
-  const [rejectionReason, setRejectionReason] = useState('المستندات غير مكتملة أو السعر غير مطابق للواقع');
+  const [rejectionReason, setRejectionReason] = useState('المستندات غير مكتملة أو السعر غير مطابق للواقع ببورسعيد');
 
   // Edit Property Modal State
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
@@ -79,8 +83,8 @@ export const AdminPage: React.FC = () => {
   const [directArea, setDirectArea] = useState<number | ''>('');
   const [directBeds, setDirectBeds] = useState(3);
   const [directBaths, setDirectBaths] = useState(2);
-  const [directDistrict, setDirectDistrict] = useState('التجمع الخامس');
-  const [directAddress, setDirectAddress] = useState('شارع التسعين الرئيسي');
+  const [directDistrict, setDirectDistrict] = useState('حي الشرق');
+  const [directAddress, setDirectAddress] = useState('شارع عاطف السادات (طرح البحر)');
   const [directImage, setDirectImage] = useState(
     'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80'
   );
@@ -133,7 +137,7 @@ export const AdminPage: React.FC = () => {
       bedrooms: Number(directBeds),
       bathrooms: Number(directBaths),
       location: {
-        city: 'القاهرة',
+        city: 'بورسعيد',
         district: directDistrict,
         address: directAddress,
       },
@@ -141,11 +145,11 @@ export const AdminPage: React.FC = () => {
       primaryImage: directImage,
       images: [directImage],
       status: 'approved', // Direct admin entry is approved immediately
-      amenities: ['أمن 24 ساعة', 'مصعد', 'جراج خاص'],
+      amenities: ['أمن 24 ساعة', 'مصعد', 'جراج خاص', 'موقع استراتيجي ببورسعيد'],
       finishingType: 'سوبر لوكس',
-      contactName: 'إدارة دار إستيت',
+      contactName: 'إدارة الحمد للعقارات',
       contactPhone: '+20 100 123 4567',
-      contactEmail: 'admin@darestate.eg',
+      contactEmail: 'admin@elhamd.local',
       createdAt: new Date().toISOString(),
     };
 
@@ -167,32 +171,44 @@ export const AdminPage: React.FC = () => {
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/20 text-gold-300 text-xs font-bold border border-gold-400/30">
                 <LayoutDashboard className="w-3.5 h-3.5" />
-                <span>{language === 'ar' ? 'لوحة تحكم المشرف (نسخة العرض التجريبي MVP)' : 'Admin Portal (MVP Prototype)'}</span>
+                <span>{language === 'ar' ? 'لوحة تحكم المشرف (إصدار بورسعيد MVP)' : 'Admin Portal (Port Said MVP)'}</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-white">
-                {language === 'ar' ? 'إدارة منصة دار إستيت' : 'DarEstate Platform Administration'}
+                {language === 'ar'
+                  ? 'إدارة منصة الحمد للتسويق والاستثمار العقاري والقانوني - بورسعيد'
+                  : 'El-Hamd Real Estate & Legal Admin Portal - Port Said'}
               </h1>
               <p className="text-xs sm:text-sm text-sand-300 max-w-2xl leading-relaxed">
                 {language === 'ar'
-                  ? 'هذه اللوحة توضيحية لبيان دورة عمل المنصة: مراجعة واعتماد عقارات المستخدمين، إدارة الطلبات، التحكم في المحتوى القانوني، ومتابعة الإحصائيات.'
-                  : 'Demonstration console to test full real estate workflows: reviewing and approving listings, managing client inquiries, and legal services.'}
+                  ? 'لوحة إدارة عقارات واستشارات محافظة بورسعيد وبورفؤاد: مراجعة واعتماد عقارات المستخدمين، إدارة طلبات المعاينة، الاستشارات القانونية، وحصص الاستثمار.'
+                  : 'Demonstration console to test full real estate workflows: reviewing and approving listings, managing client inquiries, and legal services in Port Said.'}
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              {currentUser && (
+                <button
+                  onClick={logout}
+                  className="px-4 py-2.5 rounded-xl bg-rose-950/60 hover:bg-rose-900 border border-rose-800/60 text-rose-200 font-bold text-xs flex items-center gap-1.5 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>{language === 'ar' ? 'تسجيل الخروج' : 'Log Out'}</span>
+                </button>
+              )}
+
               <button
                 onClick={() => {
                   if (
                     window.confirm(
                       language === 'ar'
-                        ? 'هل تريد إعادة ضبط جميع البيانات إلى النسخة الافتراضية؟'
-                        : 'Reset demo data to initial defaults?'
+                        ? 'هل تريد إعادة ضبط جميع البيانات إلى النسخة الافتراضية لبورسعيد؟'
+                        : 'Reset demo data to initial Port Said defaults?'
                     )
                   ) {
                     resetDemoData();
                   }
                 }}
-                className="px-4 py-2.5 rounded-xl bg-navy-900 hover:bg-rose-900/60 border border-navy-700 text-rose-300 hover:text-white font-bold text-xs flex items-center gap-2 transition-colors"
+                className="px-4 py-2.5 rounded-xl bg-navy-900 hover:bg-gold-500 hover:text-navy-950 border border-navy-700 text-sand-300 font-bold text-xs flex items-center gap-2 transition-colors"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span>{language === 'ar' ? 'استعادة البيانات الافتراضية' : 'Reset Demo Data'}</span>
@@ -615,14 +631,19 @@ export const AdminPage: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-navy-700 mb-1">
-                    {language === 'ar' ? 'المنطقة' : 'District'}
+                    {language === 'ar' ? 'الحي / المنطقة ببورسعيد *' : 'Port Said District *'}
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={directDistrict}
                     onChange={(e) => setDirectDistrict(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-sand-300 text-xs text-navy-900"
-                  />
+                    className="w-full px-3 py-2 rounded-xl border border-sand-300 text-xs text-navy-900 bg-white"
+                  >
+                    {PORT_SAID_DISTRICTS.map((dist) => (
+                      <option key={dist.id} value={dist.id}>
+                        {language === 'ar' ? dist.nameAr : dist.nameEn}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-navy-700 mb-1">

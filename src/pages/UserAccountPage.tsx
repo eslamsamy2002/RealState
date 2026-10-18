@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { StatusBadge } from '../components/common/StatusBadge';
 import { formatPrice, formatDate, getPropertyTypeLabel, getPurposeLabel } from '../utils/formatters';
 import {
@@ -21,6 +22,9 @@ import {
   Phone,
   Mail,
   AlertCircle,
+  LogOut,
+  LogIn,
+  KeyRound,
 } from 'lucide-react';
 
 export const UserAccountPage: React.FC = () => {
@@ -35,6 +39,9 @@ export const UserAccountPage: React.FC = () => {
   } = useData();
 
   const { language } = useLanguage();
+  const { isAuthenticated, isAdmin, logout } = useAuth();
+  const [searchParams] = useSearchParams();
+  const errorParam = searchParams.get('error');
 
   const [activeTab, setActiveTab] = useState<'properties' | 'inquiries' | 'legal' | 'investments'>(
     'properties'
@@ -54,22 +61,40 @@ export const UserAccountPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-sand-50 py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Top Demo Profile Header Card */}
+        {/* Error / Unauthorized Banner if any */}
+        {errorParam && (
+          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-3 shadow-sm animate-in fade-in duration-300">
+            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+            <span>{errorParam}</span>
+          </div>
+        )}
+
+        {/* Top Profile Header Card */}
         <div className="bg-white rounded-3xl border border-sand-200 p-6 sm:p-8 shadow-card">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-navy-900 to-navy-950 text-gold-400 flex items-center justify-center font-black text-xl shadow-md">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-navy-900 to-navy-950 text-gold-400 flex items-center justify-center font-black text-xl shadow-md shrink-0">
                 <User className="w-8 h-8" />
               </div>
 
               <div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="text-xl sm:text-2xl font-black text-navy-950">
                     {currentUser.name}
                   </h1>
-                  <span className="px-2.5 py-0.5 rounded-full bg-sand-100 text-navy-600 text-xs font-semibold">
-                    {language === 'ar' ? 'مستخدم تجريبي' : 'Demo Account'}
-                  </span>
+                  {isAdmin ? (
+                    <span className="px-2.5 py-0.5 rounded-full bg-gold-100 text-gold-900 border border-gold-300 text-xs font-bold">
+                      {language === 'ar' ? 'مدير المنصة (Admin)' : 'Administrator'}
+                    </span>
+                  ) : isAuthenticated ? (
+                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold">
+                      {language === 'ar' ? 'مستخدم مسجل' : 'Registered User'}
+                    </span>
+                  ) : (
+                    <span className="px-2.5 py-0.5 rounded-full bg-sand-100 text-navy-600 text-xs font-semibold">
+                      {language === 'ar' ? 'مستخدم تجريبي محلي' : 'Demo Account'}
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-wrap items-center gap-4 text-xs text-navy-500 mt-1">
                   <span className="flex items-center gap-1">
@@ -85,32 +110,50 @@ export const UserAccountPage: React.FC = () => {
             </div>
 
             {/* Profile Action Buttons */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5 flex-wrap">
               <button
                 onClick={() => setIsEditingProfile(!isEditingProfile)}
-                className="px-4 py-2 rounded-xl border border-sand-300 hover:border-gold-500 text-navy-800 text-xs font-bold transition-colors flex items-center gap-1.5"
+                className="px-3.5 py-2 rounded-xl border border-sand-300 hover:border-gold-500 text-navy-800 text-xs font-bold transition-colors flex items-center gap-1.5"
               >
                 <Edit2 className="w-3.5 h-3.5" />
                 <span>{language === 'ar' ? 'تعديل البيانات' : 'Edit Profile'}</span>
               </button>
+
+              {isAuthenticated ? (
+                <button
+                  onClick={logout}
+                  className="px-3.5 py-2 rounded-xl border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs font-bold transition-colors flex items-center gap-1.5"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>{language === 'ar' ? 'تسجيل الخروج' : 'Sign Out'}</span>
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  className="px-3.5 py-2 rounded-xl bg-gold-500 hover:bg-gold-600 text-navy-950 text-xs font-bold transition-colors flex items-center gap-1.5"
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  <span>{language === 'ar' ? 'تسجيل الدخول' : 'Sign In'}</span>
+                </Link>
+              )}
 
               <button
                 onClick={() => {
                   if (
                     window.confirm(
                       language === 'ar'
-                        ? 'هل تريد استعادة البيانات الافتراضية للمنصة ومسح التعديلات المحلية؟'
-                        : 'Reset demo data to default seeded properties?'
+                        ? 'هل تريد استعادة البيانات الافتراضية لمنصة بورسعيد ومسح التعديلات المحلية؟'
+                        : 'Reset demo data to default Port Said seeded properties?'
                     )
                   ) {
                     resetDemoData();
                   }
                 }}
-                className="px-4 py-2 rounded-xl text-rose-700 hover:bg-rose-50 border border-rose-200 text-xs font-bold transition-colors flex items-center gap-1.5"
+                className="px-3.5 py-2 rounded-xl text-navy-600 hover:bg-sand-100 border border-sand-200 text-xs font-bold transition-colors flex items-center gap-1.5"
                 title="Reset demo data"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>{language === 'ar' ? 'استعادة البيانات الافتراضية' : 'Reset Demo'}</span>
+                <span>{language === 'ar' ? 'استعادة البيانات' : 'Reset'}</span>
               </button>
             </div>
           </div>

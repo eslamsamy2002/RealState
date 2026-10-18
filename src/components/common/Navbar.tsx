@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Building2,
   PlusCircle,
   Menu,
   X,
@@ -12,45 +11,68 @@ import {
   LayoutDashboard,
   Home,
   Layers,
+  LogIn,
+  LogOut,
 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useData } from '../../context/DataContext';
+import { useAuth } from '../../context/AuthContext';
 
 export const Navbar: React.FC = () => {
-  const { t, language, toggleLanguage, isRTL } = useLanguage();
+  const { t, language, toggleLanguage } = useLanguage();
   const { pendingProperties } = useData();
+  const { currentUser, isAuthenticated, isAdmin, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navLinks = [
     { to: '/', label: t('nav.home'), icon: Home },
     { to: '/properties', label: t('nav.properties'), icon: Layers },
     { to: '/legal-services', label: t('nav.legalServices'), icon: ShieldCheck },
     { to: '/investment-shares', label: t('nav.investmentShares'), icon: TrendingUp },
-    { to: '/account', label: t('nav.account'), icon: User },
   ];
 
   const closeMenu = () => setMobileMenuOpen(false);
 
+  const handleLogout = () => {
+    logout();
+    closeMenu();
+    navigate('/');
+  };
+
   return (
-    <header className="sticky top-0 z-40 bg-navy-950/95 backdrop-blur-md border-b border-navy-800 text-white transition-all">
+    <header className="sticky top-0 z-40 bg-navy-950/98 backdrop-blur-md border-b border-navy-800 text-white transition-all shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo Brand */}
+        <div className="flex items-center justify-between h-20 sm:h-22">
+          {/* Logo Brand with Official Port Said Emblem Image */}
           <Link
             to="/"
             onClick={closeMenu}
-            className="flex items-center gap-3 group focus:outline-none"
+            className="flex items-center gap-3 sm:gap-3.5 group focus:outline-none shrink-0"
           >
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-navy-950 shadow-md shadow-gold-500/20 group-hover:scale-105 transition-transform">
-              <Building2 className="w-6 h-6 stroke-[2.2]" />
+            {/* The Logo Image */}
+            <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-gold-400/80 shadow-lg shadow-gold-500/20 group-hover:scale-105 transition-transform bg-navy-900 shrink-0">
+              <img
+                src="/logo.jpg"
+                alt="الحمد للتسويق والاستثمار العقاري والقانوني - بورسعيد"
+                className="w-full h-full object-cover"
+              />
             </div>
+
             <div className="flex flex-col">
-              <span className="text-xl sm:text-2xl font-black tracking-tight text-white group-hover:text-gold-300 transition-colors">
-                {language === 'ar' ? 'دار إستيت' : 'DarEstate'}
-              </span>
-              <span className="text-[10px] sm:text-xs text-gold-400/80 font-medium tracking-wide">
-                {language === 'ar' ? 'العقارات والاستثمار في مصر' : 'Egypt Real Estate & Investment'}
+              <div className="flex items-center gap-1.5">
+                <span className="text-xl sm:text-2xl font-black tracking-tight text-white group-hover:text-gold-300 transition-colors">
+                  {language === 'ar' ? 'الحمد' : 'El-Hamd'}
+                </span>
+                <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-gold-500/20 text-gold-300 border border-gold-400/30">
+                  {language === 'ar' ? 'بورسعيد' : 'Port Said'}
+                </span>
+              </div>
+              <span className="text-[10px] sm:text-[11px] text-sand-300 font-medium tracking-wide">
+                {language === 'ar'
+                  ? 'للتسويق والاستثمار العقاري والقانوني'
+                  : 'Real Estate & Legal Services'}
               </span>
             </div>
           </Link>
@@ -59,13 +81,12 @@ export const Navbar: React.FC = () => {
           <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
             {navLinks.map((link) => {
               const Icon = link.icon;
-              const isActive = location.pathname === link.to;
               return (
                 <NavLink
                   key={link.to}
                   to={link.to}
                   className={({ isActive }) =>
-                    `flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all ${
+                    `flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                       isActive
                         ? 'bg-gold-500/15 text-gold-300 font-bold border border-gold-500/30'
                         : 'text-sand-200 hover:text-white hover:bg-navy-900/80'
@@ -78,16 +99,32 @@ export const Navbar: React.FC = () => {
               );
             })}
 
-            {/* Admin Link with Pending Count Badge */}
+            {/* My Account Link */}
+            <NavLink
+              to="/account"
+              className={({ isActive }) =>
+                `flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                  isActive
+                    ? 'bg-gold-500/15 text-gold-300 font-bold border border-gold-500/30'
+                    : 'text-sand-200 hover:text-white hover:bg-navy-900/80'
+                }`
+              }
+            >
+              <User className="w-4 h-4 text-gold-400" />
+              <span>{t('nav.account')}</span>
+            </NavLink>
+
+            {/* Admin Link (Accessible directly, or shows if admin) */}
             <NavLink
               to="/admin"
               className={({ isActive }) =>
-                `flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all border ${
+                `flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
                   isActive
                     ? 'bg-gold-500 text-navy-950 border-gold-400 shadow-sm'
                     : 'text-gold-400/90 border-gold-500/30 hover:bg-gold-500/10'
                 }`
               }
+              title="لوحة الإدارة"
             >
               <LayoutDashboard className="w-3.5 h-3.5" />
               <span>{t('nav.admin')}</span>
@@ -99,22 +136,47 @@ export const Navbar: React.FC = () => {
             </NavLink>
           </nav>
 
-          {/* Action Area: Submit Property CTA + Language Toggle */}
-          <div className="hidden sm:flex items-center gap-3">
+          {/* Action Area: Auth / Submit / Lang */}
+          <div className="hidden sm:flex items-center gap-2.5">
             {/* Language Switcher */}
             <button
               onClick={toggleLanguage}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-sand-200 hover:text-white hover:bg-navy-900 border border-navy-800 transition-colors"
+              className="flex items-center gap-1 px-2.5 py-2 rounded-xl text-xs font-medium text-sand-200 hover:text-white hover:bg-navy-900 border border-navy-800 transition-colors"
               title={language === 'ar' ? 'Switch to English' : 'التحويل إلى العربية'}
             >
-              <Languages className="w-4 h-4 text-gold-400" />
-              <span>{language === 'ar' ? 'English' : 'عربي'}</span>
+              <Languages className="w-3.5 h-3.5 text-gold-400" />
+              <span>{language === 'ar' ? 'EN' : 'عربي'}</span>
             </button>
 
-            {/* Submit Property Button */}
+            {/* Auth Button: Login or Logout */}
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-sand-300 max-w-[120px] truncate hidden xl:inline">
+                  {currentUser?.name}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-rose-300 hover:text-white hover:bg-rose-900/40 border border-rose-800/50 transition-colors"
+                  title={t('nav.logout')}
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span className="hidden md:inline">{t('nav.logout')}</span>
+                </button>
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-sand-200 hover:text-white hover:bg-navy-900 border border-sand-700/60 transition-colors"
+              >
+                <LogIn className="w-3.5 h-3.5 text-gold-400" />
+                <span>{t('nav.login')}</span>
+              </Link>
+            )}
+
+            {/* Submit Property CTA */}
             <Link
               to="/submit-property"
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-navy-950 shadow-md shadow-gold-500/20 hover:shadow-gold-500/30 transition-all transform hover:-translate-y-0.5"
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-navy-950 shadow-md shadow-gold-500/20 hover:shadow-gold-500/30 transition-all transform hover:-translate-y-0.5"
             >
               <PlusCircle className="w-4 h-4 stroke-[2.5]" />
               <span>{t('nav.submitProperty')}</span>
@@ -166,6 +228,20 @@ export const Navbar: React.FC = () => {
             })}
 
             <Link
+              key="/account"
+              to="/account"
+              onClick={closeMenu}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium ${
+                location.pathname === '/account'
+                  ? 'bg-gold-500/15 text-gold-300 font-bold border border-gold-500/30'
+                  : 'text-sand-200 hover:bg-navy-900 hover:text-white'
+              }`}
+            >
+              <User className="w-5 h-5 text-gold-400" />
+              <span>{t('nav.account')}</span>
+            </Link>
+
+            <Link
               to="/admin"
               onClick={closeMenu}
               className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-gold-300 bg-navy-900 border border-gold-500/20"
@@ -182,7 +258,26 @@ export const Navbar: React.FC = () => {
             </Link>
           </div>
 
-          <div className="pt-3 border-t border-navy-800">
+          <div className="pt-3 border-t border-navy-800 space-y-2">
+            {isAuthenticated ? (
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-rose-300 bg-rose-950/40 border border-rose-800/50"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>{t('nav.logout')} ({currentUser?.name})</span>
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                onClick={closeMenu}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-navy-900 border border-navy-700"
+              >
+                <LogIn className="w-4 h-4 text-gold-400" />
+                <span>{t('nav.login')}</span>
+              </Link>
+            )}
+
             <Link
               to="/submit-property"
               onClick={closeMenu}

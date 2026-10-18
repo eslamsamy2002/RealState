@@ -33,8 +33,8 @@ export const WhyChooseUs: React.FC = () => {
               </h2>
               <p className="text-sm text-sand-300 max-w-2xl leading-relaxed">
                 {language === 'ar'
-                  ? 'اعرض عقارك على منصة دار إستيت لتصل إلى آلاف المشترين والمستثمرين الجادين في مصر والخليج العربي. نقوم بمراجعة العقار وتوثيق بياناته ونشره فور اعتماده.'
-                  : 'List your property on DarEstate to reach thousands of qualified buyers and investors in Egypt and the Gulf. Listings are verified and published upon admin approval.'}
+                  ? 'اعرض عقارك على منصة الحمد للتسويق والاستثمار العقاري لتصل إلى المشترين والمستثمرين الجادين في بورسعيد وبورفؤاد ومختلف المحافظات. نقوم بمراجعة العقار وتوثيق بياناته ونشره فور اعتماده.'
+                  : 'List your property on El-Hamd to reach qualified buyers and investors in Port Said, Port Fouad, and beyond. Listings are verified and published upon admin approval.'}
               </p>
               <div className="flex flex-wrap items-center gap-4 text-xs text-sand-300 pt-2">
                 <span className="flex items-center gap-1.5">

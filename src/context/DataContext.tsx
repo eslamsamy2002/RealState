@@ -12,6 +12,7 @@ import { INITIAL_PROPERTIES } from '../data/mockProperties';
 import { INITIAL_LEGAL_SERVICES } from '../data/mockLegalServices';
 import { INITIAL_INVESTMENTS } from '../data/mockInvestments';
 import { getFromStorage, saveToStorage, STORAGE_KEYS } from '../utils/storage';
+import { useAuth } from './AuthContext';
 
 interface DataContextType {
   // Properties
@@ -64,14 +65,17 @@ interface DataContextType {
 
 const DEFAULT_USER: UserProfile = {
   id: 'user-demo-1',
-  name: 'أحمد مصطفى الشناوي',
-  phone: '+20 109 999 8888',
-  email: 'ahmed.mostafa@example.com',
+  name: 'أحمد مصطفى (بورسعيد)',
+  phone: '+20 109 888 7777',
+  email: 'ahmed@elhamd.local',
+  role: 'user',
 };
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { currentUser: authUser } = useAuth();
+
   // Properties State
   const [properties, setProperties] = useState<Property[]>(() => {
     return getFromStorage<Property[]>(STORAGE_KEYS.PROPERTIES, INITIAL_PROPERTIES);
@@ -82,14 +86,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return getFromStorage<Inquiry[]>(STORAGE_KEYS.INQUIRIES, [
       {
         id: 'inq-seed-1',
-        propertyId: 'prop-1',
-        propertyTitle: 'شقة فاخرة بإطلالة مفتوحة على بحيرة صناعية في التجمع الخامس',
-        propertyPrice: 6850000,
+        propertyId: 'prop-ps-1',
+        propertyTitle: 'شقة فاخرة بإطلالة مباشرة بانورامية على مجرى قناة السويس بحي الشرق',
+        propertyPrice: 5200000,
         inquiryType: 'buy',
-        userName: 'أحمد مصطفى الشناوي',
-        userPhone: '+20 109 999 8888',
-        userEmail: 'ahmed.mostafa@example.com',
-        message: 'أرغب في حجز موعد لمعاينة الشقة غداً عصراً والاستفسار عن طرق السداد المتاحة.',
+        userName: 'أحمد مصطفى (بورسعيد)',
+        userPhone: '+20 109 888 7777',
+        userEmail: 'ahmed@elhamd.local',
+        message: 'أرغب في حجز موعد لمعاينة الشقة المطلة على القناة بحي الشرق والاستفسار عن طرق السداد المتاحة.',
         createdAt: '2025-02-19T14:30:00Z',
         status: 'new',
         userId: 'user-demo-1',
@@ -109,11 +113,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: 'leg-seed-1',
         serviceId: 'legal-1',
         serviceTitle: 'فحص سند الملكية والتسلسل القانوني',
-        userName: 'أحمد مصطفى الشناوي',
-        userPhone: '+20 109 999 8888',
-        userEmail: 'ahmed.mostafa@example.com',
-        propertyLocation: 'الشيخ زايد - كمبوند الربوة',
-        details: 'أريد تدقيق عقد بيع ابتدائي ومستندات ملكية فيلا قبل التوقيع وسداد الدفعة الأولى.',
+        userName: 'أحمد مصطفى (بورسعيد)',
+        userPhone: '+20 109 888 7777',
+        userEmail: 'ahmed@elhamd.local',
+        propertyLocation: 'بورسعيد - حي الشرق / بورفؤاد',
+        details: 'أريد تدقيق عقد بيع ابتدائي ومستندات ملكية فيلا في بورفؤاد قبل التوقيع وسداد الدفعة الأولى.',
         preferredTime: 'مساءً بعد الساعة 5',
         createdAt: '2025-02-18T11:20:00Z',
         status: 'pending',
@@ -132,15 +136,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return getFromStorage<InvestmentInquiry[]>(STORAGE_KEYS.INVESTMENT_INQUIRIES, [
       {
         id: 'inv-inq-seed-1',
-        investmentId: 'inv-1',
-        investmentTitle: 'مجمع تجاري وبنوك - شارع التسعين الشمالي التجمع الخامس',
-        sharePrice: 50000,
+        investmentId: 'inv-ps-1',
+        investmentTitle: 'مجمع تجاري ومقرات بنوك - تقاطع الثلاثيني مع محمد علي، حي العرب، بورسعيد',
+        sharePrice: 40000,
         sharesRequested: 3,
-        totalAmount: 150000,
-        userName: 'أحمد مصطفى الشناوي',
-        userPhone: '+20 109 999 8888',
-        userEmail: 'ahmed.mostafa@example.com',
-        notes: 'مهتم بتفاصيل توزيع العوائد الإيجارية ربع السنوية وعقد المشاركة.',
+        totalAmount: 120000,
+        userName: 'أحمد مصطفى (بورسعيد)',
+        userPhone: '+20 109 888 7777',
+        userEmail: 'ahmed@elhamd.local',
+        notes: 'مهتم بتفاصيل توزيع العوائد الإيجارية ربع السنوية للمجمع التجاري بحي العرب.',
         createdAt: '2025-02-17T09:15:00Z',
         status: 'new',
         userId: 'user-demo-1',
@@ -148,10 +152,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     ]);
   });
 
-  // Current User Profile State
-  const [currentUser, setCurrentUser] = useState<UserProfile>(() => {
+  // User Profile State
+  const [customProfile, setCustomProfile] = useState<UserProfile>(() => {
     return getFromStorage<UserProfile>(STORAGE_KEYS.USER_PROFILE, DEFAULT_USER);
   });
+
+  // Active Effective User (if authenticated, use authUser)
+  const activeUser: UserProfile = authUser
+    ? {
+        id: authUser.id,
+        name: authUser.name,
+        email: authUser.email,
+        phone: authUser.phone || customProfile.phone,
+        role: authUser.role,
+      }
+    : customProfile;
 
   // Save to storage on changes
   useEffect(() => {
@@ -175,17 +190,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [investmentInquiries]);
 
   useEffect(() => {
-    saveToStorage(STORAGE_KEYS.USER_PROFILE, currentUser);
-  }, [currentUser]);
+    saveToStorage(STORAGE_KEYS.USER_PROFILE, customProfile);
+  }, [customProfile]);
 
   // Derived collections
   const publicApprovedProperties = properties.filter((p) => p.status === 'approved');
-  const userProperties = properties.filter((p) => p.submittedByUserId === currentUser.id);
+  const userProperties = properties.filter((p) => p.submittedByUserId === activeUser.id);
   const pendingProperties = properties.filter((p) => p.status === 'pending');
   const activeLegalServices = legalServices.filter((s) => s.isActive);
-  const userInquiries = inquiries.filter((inq) => inq.userId === currentUser.id);
-  const userLegalRequests = legalRequests.filter((req) => req.userId === currentUser.id);
-  const userInvestmentInquiries = investmentInquiries.filter((inv) => inv.userId === currentUser.id);
+  const userInquiries = inquiries.filter((inq) => inq.userId === activeUser.id);
+  const userLegalRequests = legalRequests.filter((req) => req.userId === activeUser.id);
+  const userInvestmentInquiries = investmentInquiries.filter((inv) => inv.userId === activeUser.id);
 
   // Property Actions
   const addPropertySubmission = (
@@ -193,11 +208,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   ): Property => {
     const newProperty: Property = {
       ...data,
-      id: `prop-${Date.now()}`,
+      id: `prop-ps-${Date.now()}`,
       createdAt: new Date().toISOString(),
-      status: 'pending', // By requirement: saved as "Pending Approval"
+      status: 'pending',
       isUserSubmission: true,
-      submittedByUserId: currentUser.id,
+      submittedByUserId: activeUser.id,
     };
     setProperties((prev) => [newProperty, ...prev]);
     return newProperty;
@@ -219,7 +234,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const rejectProperty = (id: string, reason?: string) => {
     setProperties((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, status: 'rejected', rejectionReason: reason || 'لم يستوفِ الشروط والضوابط المعتمدة' } : p))
+      prev.map((p) =>
+        p.id === id
+          ? { ...p, status: 'rejected', rejectionReason: reason || 'لم يستوفِ الشروط والضوابط المعتمدة ببورسعيد' }
+          : p
+      )
     );
   };
 
@@ -240,7 +259,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: `inq-${Date.now()}`,
       createdAt: new Date().toISOString(),
       status: 'new',
-      userId: currentUser.id,
+      userId: activeUser.id,
     };
     setInquiries((prev) => [newInquiry, ...prev]);
     return newInquiry;
@@ -281,7 +300,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: `leg-req-${Date.now()}`,
       createdAt: new Date().toISOString(),
       status: 'pending',
-      userId: currentUser.id,
+      userId: activeUser.id,
     };
     setLegalRequests((prev) => [newRequest, ...prev]);
     return newRequest;
@@ -300,7 +319,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: `inv-inq-${Date.now()}`,
       createdAt: new Date().toISOString(),
       status: 'new',
-      userId: currentUser.id,
+      userId: activeUser.id,
     };
     setInvestmentInquiries((prev) => [newInquiry, ...prev]);
     return newInquiry;
@@ -312,7 +331,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Current User Action
   const updateCurrentUser = (profile: Partial<UserProfile>) => {
-    setCurrentUser((prev) => ({ ...prev, ...profile }));
+    setCustomProfile((prev) => ({ ...prev, ...profile }));
   };
 
   // Reset demo data to defaults
@@ -328,7 +347,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     saveToStorage(STORAGE_KEYS.INQUIRIES, []);
     saveToStorage(STORAGE_KEYS.LEGAL_REQUESTS, []);
     saveToStorage(STORAGE_KEYS.INVESTMENT_INQUIRIES, []);
-    setCurrentUser(DEFAULT_USER);
+    setCustomProfile(DEFAULT_USER);
     saveToStorage(STORAGE_KEYS.USER_PROFILE, DEFAULT_USER);
   };
 
@@ -370,7 +389,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         createInvestmentInquiry,
         updateInvestmentInquiryStatus,
 
-        currentUser,
+        currentUser: activeUser,
         updateCurrentUser,
 
         resetDemoData,

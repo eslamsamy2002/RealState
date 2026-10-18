@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
+import { PORT_SAID_DISTRICTS } from '../../data/portSaidLocations';
 import {
   Search,
   MapPin,
   Building2,
-  Tag,
   ShieldCheck,
   TrendingUp,
   Sparkles,
@@ -34,14 +34,14 @@ export const HeroSearch: React.FC = () => {
 
   return (
     <div className="relative min-h-[640px] lg:min-h-[700px] flex items-center justify-center bg-navy-950 overflow-hidden">
-      {/* Background Photography with Luxury Dark Gradient */}
+      {/* Background Photography with Coastal / Port Said Atmosphere */}
       <div className="absolute inset-0">
         <img
           src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2000&q=80"
-          alt="Modern Egyptian Luxury Architecture"
-          className="w-full h-full object-cover object-center opacity-30 scale-105 animate-in fade-in duration-1000"
+          alt="Port Said Real Estate Architecture"
+          className="w-full h-full object-cover object-center opacity-25 scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/80 to-navy-950/60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/85 to-navy-950/70" />
       </div>
 
       {/* Decorative Gold Glow Circles */}
@@ -60,11 +60,11 @@ export const HeroSearch: React.FC = () => {
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.2] mb-6">
           {language === 'ar' ? (
             <>
-              وجهتك الأولى لتملك <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 to-gold-500">العقارات الفاخرة</span> والاستثمار في مصر
+              وجهتكم الأولى لتملك <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 to-gold-500">عقارات بورسعيد وبورفؤاد</span> بأمان قانوني تام
             </>
           ) : (
             <>
-              Discover <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 to-gold-500">Premium Real Estate</span> & Investments Across Egypt
+              Your Gateway to <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 to-gold-500">Port Said & Port Fouad</span> Real Estate
             </>
           )}
         </h1>
@@ -87,7 +87,7 @@ export const HeroSearch: React.FC = () => {
                   : 'bg-sand-100/70 text-navy-700 hover:bg-sand-200/60'
               }`}
             >
-              {language === 'ar' ? 'عقارات للبيع' : 'Properties for Sale'}
+              {language === 'ar' ? 'عقارات للبيع في بورسعيد' : 'For Sale in Port Said'}
             </button>
             <button
               type="button"
@@ -98,13 +98,13 @@ export const HeroSearch: React.FC = () => {
                   : 'bg-sand-100/70 text-navy-700 hover:bg-sand-200/60'
               }`}
             >
-              {language === 'ar' ? 'عقارات للإيجار' : 'Properties for Rent'}
+              {language === 'ar' ? 'عقارات للإيجار' : 'For Rent'}
             </button>
           </div>
 
           {/* Search Inputs Grid */}
           <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
-            {/* Location Select */}
+            {/* Port Said District Select */}
             <div className="relative">
               <label className="block text-[11px] font-bold text-navy-600 mb-1">
                 {t('filter.location')}
@@ -115,14 +115,12 @@ export const HeroSearch: React.FC = () => {
                   onChange={(e) => setLocation(e.target.value)}
                   className="w-full px-3 py-2.5 rounded-xl border border-sand-300 text-xs sm:text-sm font-semibold text-navy-900 focus:outline-none focus:ring-2 focus:ring-gold-500/50 bg-sand-50/50"
                 >
-                  <option value="">{language === 'ar' ? 'جميع المناطق والمدن' : 'All Regions'}</option>
-                  <option value="التجمع">{language === 'ar' ? 'التجمع الخامس (القاهرة الجديدة)' : 'Fifth Settlement (New Cairo)'}</option>
-                  <option value="الشيخ زايد">{language === 'ar' ? 'الشيخ زايد' : 'Sheikh Zayed'}</option>
-                  <option value="أكتوبر">{language === 'ar' ? 'السادس من أكتوبر' : '6th of October'}</option>
-                  <option value="مدينة نصر">{language === 'ar' ? 'مدينة نصر' : 'Nasr City'}</option>
-                  <option value="المعادي">{language === 'ar' ? 'المعادي' : 'Maadi'}</option>
-                  <option value="العاصمة">{language === 'ar' ? 'العاصمة الإدارية الجديدة' : 'New Capital'}</option>
-                  <option value="الساحل">{language === 'ar' ? 'الساحل الشمالي' : 'North Coast'}</option>
+                  <option value="">{language === 'ar' ? 'جميع أحياء بورسعيد وبورفؤاد' : 'All Port Said Districts'}</option>
+                  {PORT_SAID_DISTRICTS.map((district) => (
+                    <option key={district.id} value={district.id}>
+                      {language === 'ar' ? district.nameAr : district.nameEn}
+                    </option>
+                  ))}
                 </select>
                 <MapPin className="w-4 h-4 text-gold-600 absolute end-3 top-3.5 pointer-events-none" />
               </div>
@@ -139,14 +137,14 @@ export const HeroSearch: React.FC = () => {
                   onChange={(e) => setPropertyType(e.target.value)}
                   className="w-full px-3 py-2.5 rounded-xl border border-sand-300 text-xs sm:text-sm font-semibold text-navy-900 focus:outline-none focus:ring-2 focus:ring-gold-500/50 bg-sand-50/50"
                 >
-                  <option value="">{language === 'ar' ? 'جميع الأنواع' : 'All Types'}</option>
+                  <option value="">{language === 'ar' ? 'جميع أنواع العقارات' : 'All Types'}</option>
                   <option value="apartment">{language === 'ar' ? 'شقق سكنية' : 'Apartments'}</option>
                   <option value="villa">{language === 'ar' ? 'فلل مستقلة' : 'Villas'}</option>
                   <option value="duplex">{language === 'ar' ? 'دوبلكس' : 'Duplexes'}</option>
                   <option value="commercial_shop">{language === 'ar' ? 'محلات تجارية' : 'Commercial Shops'}</option>
-                  <option value="office">{language === 'ar' ? 'مكاتب إدارية' : 'Offices'}</option>
+                  <option value="office">{language === 'ar' ? 'مكاتب إدارية وملاحية' : 'Maritime & Office'}</option>
                   <option value="clinic">{language === 'ar' ? 'عيادات طبية' : 'Clinics'}</option>
-                  <option value="chalet">{language === 'ar' ? 'شاليهات' : 'Chalets'}</option>
+                  <option value="chalet">{language === 'ar' ? 'شاليهات ساحلية' : 'Chalets'}</option>
                 </select>
                 <Building2 className="w-4 h-4 text-gold-600 absolute end-3 top-3.5 pointer-events-none" />
               </div>
@@ -170,15 +168,15 @@ export const HeroSearch: React.FC = () => {
         <div className="mt-12 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs sm:text-sm text-sand-300">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-gold-400" />
-            <span>{language === 'ar' ? 'عقارات مفحوصة قانونياً' : 'Legally Verified Listings'}</span>
+            <span>{language === 'ar' ? 'عقارات مفحوصة ومسجلة في بورسعيد' : 'Verified Port Said Listings'}</span>
           </div>
           <div className="flex items-center gap-2">
             <Building2 className="w-4 h-4 text-gold-400" />
-            <span>{language === 'ar' ? 'أسعار حقيقية بالجنيه المصري' : 'Transparent EGP Pricing'}</span>
+            <span>{language === 'ar' ? 'أسعار رسمية بالجنيه المصري' : 'Transparent EGP Pricing'}</span>
           </div>
           <div className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-gold-400" />
-            <span>{language === 'ar' ? 'فرص استثمار جزئي بعوائد دورية' : 'Fractional Ownership Demo'}</span>
+            <span>{language === 'ar' ? 'فرص استثمار في المجمعات التجارية والملاحية' : 'Commercial & Maritime Shares'}</span>
           </div>
         </div>
       </div>

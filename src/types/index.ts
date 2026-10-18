@@ -11,12 +11,22 @@ export type PropertyPurpose = 'sale' | 'rent';
 
 export type ListingStatus = 'pending' | 'approved' | 'rejected';
 
+export type PortSaidDistrict = 
+  | 'حي الشرق'
+  | 'حي العرب'
+  | 'حي المناخ'
+  | 'حي الضواحي'
+  | 'حي الزهور'
+  | 'حي الجنوب'
+  | 'حي غرب'
+  | 'بورفؤاد';
+
 export interface PropertyLocation {
   city: string;
   cityEn?: string;
-  district: string;
+  district: string; // Port Said District
   districtEn?: string;
-  address: string;
+  address: string; // Specific street or landmark (demo)
 }
 
 export interface Property {
@@ -133,17 +143,33 @@ export interface InvestmentInquiry {
   userId?: string;
 }
 
+export type UserRole = 'admin' | 'user';
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: UserRole;
+}
+
+export interface StoredUser extends AuthUser {
+  password?: string;
+  createdAt?: string;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
   phone: string;
   email: string;
+  role?: UserRole;
 }
 
 export interface FilterState {
   purpose: 'all' | 'sale' | 'rent';
   type: string;
-  location: string;
+  location: string; // Port Said District filter
   minPrice: number | '';
   maxPrice: number | '';
   bedrooms: string;

@@ -10,6 +10,8 @@ import { LegalServicesPage } from './pages/LegalServicesPage';
 import { InvestmentSharesPage } from './pages/InvestmentSharesPage';
 import { UserAccountPage } from './pages/UserAccountPage';
 import { AdminPage } from './pages/AdminPage';
+import { LoginPage } from './pages/LoginPage';
+import { ProtectedRoute } from './components/common/ProtectedRoute';
 
 // Scroll to top on route change
 function ScrollToTop() {
@@ -36,7 +38,16 @@ export const App: React.FC = () => {
           <Route path="/legal-services" element={<LegalServicesPage />} />
           <Route path="/investment-shares" element={<InvestmentSharesPage />} />
           <Route path="/account" element={<UserAccountPage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          {/* Admin Protected Route Guard */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <AdminPage />
+              </ProtectedRoute>
+            }
+          />
           {/* Fallback to Home */}
           <Route path="*" element={<HomePage />} />
         </Routes>

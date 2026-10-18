@@ -29,14 +29,15 @@ export const PropertyFilterBar: React.FC<PropertyFilterBarProps> = ({
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const locations = [
-    { id: '', label: language === 'ar' ? 'جميع المناطق والمدن' : 'All Locations' },
-    { id: 'التجمع', label: language === 'ar' ? 'التجمع الخامس والقاهرة الجديدة' : 'New Cairo / 5th Settlement' },
-    { id: 'الشيخ زايد', label: language === 'ar' ? 'الشيخ زايد' : 'Sheikh Zayed' },
-    { id: 'أكتوبر', label: language === 'ar' ? 'السادس من أكتوبر' : '6th of October' },
-    { id: 'مدينة نصر', label: language === 'ar' ? 'مدينة نصر' : 'Nasr City' },
-    { id: 'المعادي', label: language === 'ar' ? 'المعادي' : 'Maadi' },
-    { id: 'العاصمة', label: language === 'ar' ? 'العاصمة الإدارية الجديدة' : 'New Capital' },
-    { id: 'الساحل', label: language === 'ar' ? 'الساحل الشمالي' : 'North Coast' },
+    { id: '', label: language === 'ar' ? 'جميع أحياء بورسعيد وبورفؤاد' : 'All Port Said Districts' },
+    { id: 'حي الشرق', label: language === 'ar' ? 'حي الشرق' : 'El Shark District' },
+    { id: 'حي العرب', label: language === 'ar' ? 'حي العرب' : 'El Arab District' },
+    { id: 'حي المناخ', label: language === 'ar' ? 'حي المناخ' : 'El Manakh District' },
+    { id: 'حي الضواحي', label: language === 'ar' ? 'حي الضواحي' : 'El Dawahi District' },
+    { id: 'حي الزهور', label: language === 'ar' ? 'حي الزهور' : 'El Zohour District' },
+    { id: 'حي الجنوب', label: language === 'ar' ? 'حي الجنوب' : 'El Ganoub District' },
+    { id: 'حي غرب', label: language === 'ar' ? 'حي غرب' : 'Hay Gharb' },
+    { id: 'بورفؤاد', label: language === 'ar' ? 'مدينة بورفؤاد' : 'Port Fouad City' },
   ];
 
   const propertyTypes = [

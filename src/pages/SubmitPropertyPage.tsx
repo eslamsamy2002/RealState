@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { useLanguage } from '../context/LanguageContext';
 import { PropertyType, PropertyPurpose } from '../types';
+import { PORT_SAID_DISTRICTS } from '../data/portSaidLocations';
 import {
   PlusCircle,
   Clock,
@@ -19,23 +20,23 @@ import {
 
 const SAMPLE_IMAGES = [
   {
-    labelAr: 'شقة فاخرة / ريسبشن واسع',
-    labelEn: 'Luxury Apartment Living Room',
+    labelAr: 'شقة فاخرة / حي الشرق',
+    labelEn: 'Luxury Apartment / El Shark',
     url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
   },
   {
-    labelAr: 'فيلا مستقلة مودرن بحمام سباحة',
-    labelEn: 'Modern Villa with Pool',
+    labelAr: 'فيلا راقية بحديقة / بورفؤاد',
+    labelEn: 'Villa with Garden / Port Fouad',
     url: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80',
   },
   {
-    labelAr: 'محل تجاري / واجهة تسوق',
-    labelEn: 'Commercial Storefront',
+    labelAr: 'محل تجاري / حي العرب',
+    labelEn: 'Commercial Store / El Arab',
     url: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80',
   },
   {
-    labelAr: 'مكتب إداري مجهز',
-    labelEn: 'Executive Modern Office',
+    labelAr: 'مكتب إداري ملاحي / حي المناخ',
+    labelEn: 'Maritime Office / El Manakh',
     url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80',
   },
 ];
@@ -55,8 +56,8 @@ export const SubmitPropertyPage: React.FC = () => {
   const [area, setArea] = useState<number | ''>('');
   const [bedrooms, setBedrooms] = useState<number>(3);
   const [bathrooms, setBathrooms] = useState<number>(2);
-  const [city, setCity] = useState('القاهرة');
-  const [district, setDistrict] = useState('التجمع الخامس - القاهرة الجديدة');
+  const [city, setCity] = useState('بورسعيد');
+  const [district, setDistrict] = useState('حي الشرق');
   const [address, setAddress] = useState('');
   const [imageUrl, setImageUrl] = useState(SAMPLE_IMAGES[0].url);
   const [finishingType, setFinishingType] = useState('سوبر لوكس');
@@ -398,52 +399,59 @@ export const SubmitPropertyPage: React.FC = () => {
               <div>
                 <h3 className="text-base font-bold text-navy-950 border-b border-sand-200 pb-3 mb-5 flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-gold-600" />
-                  <span>{language === 'ar' ? '3. الموقع والعنوان في مصر' : '3. Location in Egypt'}</span>
+                  <span>{language === 'ar' ? '3. الموقع والحي في محافظة بورسعيد' : '3. Location in Port Said'}</span>
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-xs font-bold text-navy-700 mb-1.5">
-                      {language === 'ar' ? 'المدينة / المحافظة *' : 'City / Governorate *'}
+                      {language === 'ar' ? 'المحافظة *' : 'Governorate *'}
                     </label>
-                    <select
-                      value={city}
-                      onChange={(e) => setCity(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-sand-300 text-sm text-navy-900 focus:outline-none focus:ring-2 focus:ring-gold-500/50 bg-white"
-                    >
-                      <option value="القاهرة">القاهرة (Cairo)</option>
-                      <option value="الجيزة">الجيزة (Giza)</option>
-                      <option value="العاصمة الإدارية">العاصمة الإدارية الجديدة (New Capital)</option>
-                      <option value="الساحل الشمالي">الساحل الشمالي (North Coast)</option>
-                      <option value="الإسكندرية">الإسكندرية (Alexandria)</option>
-                    </select>
+                    <input
+                      type="text"
+                      readOnly
+                      value={language === 'ar' ? 'محافظة بورسعيد' : 'Port Said Governorate'}
+                      className="w-full px-4 py-2.5 rounded-xl border border-sand-300 text-sm text-navy-900 bg-sand-100/70 font-semibold cursor-not-allowed"
+                    />
                   </div>
 
                   <div>
                     <label className="block text-xs font-bold text-navy-700 mb-1.5">
-                      {language === 'ar' ? 'الحي / المنطقة *' : 'District *'}
+                      {language === 'ar' ? 'الحي / المنطقة في بورسعيد *' : 'Port Said District *'}
                     </label>
-                    <input
-                      type="text"
-                      required
+                    <select
                       value={district}
                       onChange={(e) => setDistrict(e.target.value)}
-                      placeholder="مثال: التجمع الخامس، المربع الذهبي"
-                      className="w-full px-4 py-2.5 rounded-xl border border-sand-300 text-sm text-navy-900 focus:outline-none focus:ring-2 focus:ring-gold-500/50"
-                    />
+                      className="w-full px-4 py-2.5 rounded-xl border border-sand-300 text-sm text-navy-900 focus:outline-none focus:ring-2 focus:ring-gold-500/50 bg-white"
+                      required
+                    >
+                      {PORT_SAID_DISTRICTS.map((dist) => (
+                        <option key={dist.id} value={dist.id}>
+                          {language === 'ar' ? dist.nameAr : dist.nameEn}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-xs font-bold text-navy-700 mb-1.5">
-                    {language === 'ar' ? 'العنوان التفصيلي واسم الكمبوند أو الشارع *' : 'Detailed Address / Street *'}
+                    {language === 'ar' ? 'العنوان التفصيلي واسم الشارع أو المعلم *' : 'Street / Landmark Address *'}
                   </label>
                   <input
                     type="text"
                     required
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    placeholder="مثال: عمارة 14، شارع التسعين الجنوبي، بجوار مجمع المستشفيات"
+                    placeholder={
+                      district === 'حي الشرق'
+                        ? 'مثال: شارع عاطف السادات (طرح البحر)، بجوار ممشى ديليسبس'
+                        : district === 'حي العرب'
+                        ? 'مثال: شارع الثلاثيني، تقاطع محمد علي'
+                        : district === 'بورفؤاد'
+                        ? 'مثال: حي الفلل، بالقرب من نادي الصيد'
+                        : 'مثال: الشارع الرئيسي، بالقرب من الخدمات'
+                    }
                     className="w-full px-4 py-2.5 rounded-xl border border-sand-300 text-sm text-navy-900 focus:outline-none focus:ring-2 focus:ring-gold-500/50"
                   />
                 </div>
