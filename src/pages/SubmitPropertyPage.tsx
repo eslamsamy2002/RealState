@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -52,6 +52,7 @@ export const SubmitPropertyPage: React.FC = () => {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const confirmationRef = useRef<HTMLDivElement | null>(null);
 
   // Contact Info
   const [contactName, setContactName] = useState(authUser?.name || '');
@@ -69,6 +70,35 @@ export const SubmitPropertyPage: React.FC = () => {
   const [submittedPropertyId, setSubmittedPropertyId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState(false);
   const [error, setError] = useState('');
+
+  // Automatically scroll smoothly to top / confirmation section upon successful submission
+  useEffect(() => {
+    if (submittedPropertyId) {
+      const scrollToTop = () => {
+        if (confirmationRef.current) {
+          confirmationRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        window.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: 'smooth',
+        });
+      };
+
+      // Trigger scroll on next animation frame after DOM is updated
+      const frameId = requestAnimationFrame(() => {
+        scrollToTop();
+      });
+
+      // Backup timeout for mobile browsers where DOM layout reflow takes a moment
+      const timer = setTimeout(scrollToTop, 80);
+
+      return () => {
+        cancelAnimationFrame(frameId);
+        clearTimeout(timer);
+      };
+    }
+  }, [submittedPropertyId]);
 
   const toggleAmenity = (item: string) => {
     setAmenities((prev) =>
@@ -224,7 +254,11 @@ export const SubmitPropertyPage: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* If successfully submitted: Confirmation Screen */}
         {submittedPropertyId ? (
-          <div className="bg-white rounded-3xl border border-sand-200 p-8 sm:p-12 text-center shadow-card space-y-6 animate-in zoom-in-95 duration-300">
+          <div
+            ref={confirmationRef}
+            id="submission-confirmation"
+            className="scroll-mt-24 bg-white rounded-3xl border border-sand-200 p-8 sm:p-12 text-center shadow-card space-y-6 animate-in zoom-in-95 duration-300"
+          >
             <div className="w-20 h-20 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto shadow-inner">
               <Clock className="w-10 h-10 animate-pulse" />
             </div>
