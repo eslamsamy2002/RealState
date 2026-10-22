@@ -18,6 +18,7 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
   const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
 
   const featured = properties.filter((p) => p.featured).slice(0, 4);
+  const displayProperties = featured.length > 0 ? featured : properties.slice(0, 4);
 
   return (
     <section className="py-16 bg-sand-50">
@@ -46,16 +47,38 @@ export const FeaturedSection: React.FC<FeaturedSectionProps> = ({
           </Link>
         </div>
 
-        {/* Properties Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featured.map((prop) => (
-            <PropertyCard
-              key={prop.id}
-              property={prop}
-              onQuickInquiry={onQuickInquiry}
-            />
-          ))}
-        </div>
+        {/* Properties Grid or Empty State */}
+        {displayProperties.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {displayProperties.map((prop) => (
+              <PropertyCard
+                key={prop.id}
+                property={prop}
+                onQuickInquiry={onQuickInquiry}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-3xl border border-sand-200 p-8 sm:p-12 text-center max-w-lg mx-auto shadow-sm space-y-4">
+            <h3 className="text-base font-bold text-navy-950">
+              {language === 'ar' ? 'عقارات بورسعيد قيد المراجعة والاعتماد' : 'Port Said Listings Awaiting Approval'}
+            </h3>
+            <p className="text-xs text-navy-600 leading-relaxed">
+              {language === 'ar'
+                ? 'يتم نشر العقارات فور اعتمادها من إدارة المنصة. إذا كان لديك عقار ترغب في بيعه أو تأجيره، أضفه الآن مجاناً.'
+                : 'Listings are published once vetted by platform administrators. You can list your property now.'}
+            </p>
+            <div className="pt-2">
+              <Link
+                to="/submit-property"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gold-500 hover:bg-gold-600 text-navy-950 font-bold text-xs shadow-sm transition-all"
+              >
+                <span>{language === 'ar' ? 'أضف عقارك الآن' : 'List Property Now'}</span>
+                <ArrowIcon className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -101,13 +101,13 @@ export const LegalServicesPage: React.FC = () => {
           </div>
           <h1 className="text-2xl sm:text-4xl font-black text-navy-950 mb-3">
             {language === 'ar'
-              ? 'حماية قانونية كاملة لمعاملاتك العقارية في مصر'
-              : 'Complete Legal Protection for Real Estate Transactions in Egypt'}
+              ? 'حماية قانونية متكاملة لمعاملاتك العقارية في بورسعيد'
+              : 'Complete Legal Protection for Real Estate Transactions in Port Said'}
           </h1>
           <p className="text-xs sm:text-sm text-navy-600 leading-relaxed">
             {language === 'ar'
-              ? 'نوفر لك ولعائلتك راحة البال التامة عبر تدقيق سندات الملكية، وصياغة ومراجعة عقود البيع والشراء والإيجار، وتوجيهك خطوة بخطوة في إجراءات الشهر العقاري والتسجيل والتصالح.'
-              : 'Comprehensive due diligence, contract auditing, and registry guidance to ensure seamless and safe transactions.'}
+              ? 'نوفر لك ولعائلتك راحة البال التامة عبر تدقيق سندات الملكية، وصياغة ومراجعة عقود البيع والشراء والإيجار، وتوجيهك خطوة بخطوة في إجراءات الشهر العقاري والتسجيل والتصالح بأحياء بورسعيد.'
+              : 'Comprehensive due diligence, contract auditing, and registry guidance to ensure seamless and safe transactions in Port Said.'}
           </p>
         </div>
 
@@ -116,12 +116,12 @@ export const LegalServicesPage: React.FC = () => {
           <AlertCircle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
           <div className="text-xs text-amber-900 leading-relaxed">
             <p className="font-bold mb-0.5">
-              {language === 'ar' ? 'إخلاء مسؤولية وتنويه قانوني هام:' : 'Important Legal Notice & Disclaimer:'}
+              {language === 'ar' ? 'إخلاء مسؤولية وتنويه قانوني هام:' : 'Important Legal Notice & Advisory:'}
             </p>
             <p>
               {language === 'ar'
-                ? 'جميع الخدمات والاستشارات المذكورة على هذه المنصة هي خدمات إرشادية وتوضيحية نموذجية (MVP Demo) ولا تغني عن استشارة محامٍ مقيد بنقابة المحامين أو توكيل رسمي أمام الجهات القضائية والشهر العقاري المختص.'
-                : 'All services listed are informational and illustrative for this prototype. They do not substitute formal licensed legal counsel or official power of attorney.'}
+                ? 'جميع الخدمات والاستشارات المذكورة على هذه المنصة تهدف إلى توجيه وإرشاد المتعاملين وفحص المستندات العقارية، وتخضع للإجراءات والتوثيق الرسمي أمام الجهات القضائية ومكاتب الشهر العقاري المختصة بمحافظة بورسعيد.'
+                : 'All services listed provide guidance and document verification for real estate buyers and sellers, subject to official notarial procedures in Port Said.'}
             </p>
           </div>
         </div>

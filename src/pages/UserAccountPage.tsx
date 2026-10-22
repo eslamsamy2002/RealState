@@ -35,7 +35,6 @@ export const UserAccountPage: React.FC = () => {
     userInquiries,
     userLegalRequests,
     userInvestmentInquiries,
-    resetDemoData,
   } = useData();
 
   const { language } = useLanguage();
@@ -80,7 +79,7 @@ export const UserAccountPage: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="text-xl sm:text-2xl font-black text-navy-950">
-                    {currentUser.name}
+                    {currentUser.name || (language === 'ar' ? 'حساب الزائر' : 'Guest Account')}
                   </h1>
                   {isAdmin ? (
                     <span className="px-2.5 py-0.5 rounded-full bg-gold-100 text-gold-900 border border-gold-300 text-xs font-bold">
@@ -92,19 +91,23 @@ export const UserAccountPage: React.FC = () => {
                     </span>
                   ) : (
                     <span className="px-2.5 py-0.5 rounded-full bg-sand-100 text-navy-600 text-xs font-semibold">
-                      {language === 'ar' ? 'مستخدم تجريبي محلي' : 'Demo Account'}
+                      {language === 'ar' ? 'زائر (تسجيل الدخول اختياري)' : 'Guest (Login Optional)'}
                     </span>
                   )}
                 </div>
                 <div className="flex flex-wrap items-center gap-4 text-xs text-navy-500 mt-1">
-                  <span className="flex items-center gap-1">
-                    <Phone className="w-3.5 h-3.5 text-gold-600" />
-                    <span dir="ltr">{currentUser.phone}</span>
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Mail className="w-3.5 h-3.5 text-gold-600" />
-                    <span>{currentUser.email}</span>
-                  </span>
+                  {currentUser.phone && (
+                    <span className="flex items-center gap-1">
+                      <Phone className="w-3.5 h-3.5 text-gold-600" />
+                      <span dir="ltr">{currentUser.phone}</span>
+                    </span>
+                  )}
+                  {currentUser.email && (
+                    <span className="flex items-center gap-1">
+                      <Mail className="w-3.5 h-3.5 text-gold-600" />
+                      <span>{currentUser.email}</span>
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -136,25 +139,6 @@ export const UserAccountPage: React.FC = () => {
                   <span>{language === 'ar' ? 'تسجيل الدخول' : 'Sign In'}</span>
                 </Link>
               )}
-
-              <button
-                onClick={() => {
-                  if (
-                    window.confirm(
-                      language === 'ar'
-                        ? 'هل تريد استعادة البيانات الافتراضية للمنصة ومسح التعديلات المحلية؟'
-                        : 'Reset demo data to default seeded properties?'
-                    )
-                  ) {
-                    resetDemoData();
-                  }
-                }}
-                className="px-4 py-2 rounded-xl text-rose-700 hover:bg-rose-50 border border-rose-200 text-xs font-bold transition-colors flex items-center gap-1.5"
-                title="Reset demo data"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>{language === 'ar' ? 'استعادة البيانات الافتراضية' : 'Reset Demo'}</span>
-              </button>
             </div>
           </div>
 
@@ -220,13 +204,13 @@ export const UserAccountPage: React.FC = () => {
             </form>
           )}
 
-          {/* Notice about localStorage */}
+          {/* Notice about account data */}
           <div className="mt-6 pt-4 border-t border-sand-100 flex items-center gap-2 text-xs text-navy-500">
-            <AlertCircle className="w-4 h-4 text-gold-600 shrink-0" />
+            <ShieldCheck className="w-4 h-4 text-gold-600 shrink-0" />
             <span>
               {language === 'ar'
-                ? 'ملاحظة: يتم تخزين بيانات الحساب والإعلانات محلياً على متصفحك (localStorage) لأغراض العرض والتجربة فقط.'
-                : 'Note: Profile and submission state are saved locally in browser localStorage for MVP demo purposes.'}
+                ? 'يتم تأمين وحفظ بيانات حسابك وعقاراتك بأمان وفقاً لسياسات الخصوصية والأمان المعتمدة للمنصة.'
+                : 'Your account data and property submissions are securely protected and managed in compliance with privacy standards.'}
             </span>
           </div>
         </div>

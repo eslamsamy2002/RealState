@@ -176,7 +176,7 @@ export const HeroSearch: React.FC = () => {
           </div>
           <div className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-gold-400" />
-            <span>{language === 'ar' ? 'فرص استثمار جزئي بعوائد دورية' : 'Fractional Ownership Demo'}</span>
+            <span>{language === 'ar' ? 'فرص استثمار عقاري مشترك' : 'Shared Real Estate Investment'}</span>
           </div>
         </div>
       </div>

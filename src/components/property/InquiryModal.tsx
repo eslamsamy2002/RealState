@@ -88,8 +88,8 @@ export const InquiryModal: React.FC<InquiryModalProps> = ({
           </h4>
           <p className="text-sm text-navy-600 max-w-md mx-auto leading-relaxed">
             {language === 'ar'
-              ? 'تم تسجيل اهتمامك بهذا العقار وحفظه في ملفك الشخصي. سيقوم مستشار دار إستيت بالتواصل معك هاتفياً أو عبر واتساب لمراجعة كافة التفاصيل وتحديد موعد المعاينة.'
-              : 'Your inquiry has been recorded and saved to your account. A DarEstate advisor will reach out to schedule a private viewing and answer questions.'}
+              ? 'تم تسجيل اهتمامك بهذا العقار وحفظه في النظام. سيقوم مستشار الحمد للعقارات بالتواصل معك هاتفياً أو عبر واتساب لمراجعة كافة التفاصيل وتحديد موعد المعاينة.'
+              : 'Your inquiry has been recorded and saved. An El-Hamd real estate advisor will reach out to schedule a private viewing and answer questions.'}
           </p>
           <div className="pt-4">
             <button

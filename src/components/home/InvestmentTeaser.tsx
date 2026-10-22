@@ -32,7 +32,7 @@ export const InvestmentTeaser: React.FC = () => {
           <div className="lg:col-span-5 space-y-5">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/20 border border-gold-400/30 text-gold-300 text-xs font-bold">
               <TrendingUp className="w-3.5 h-3.5" />
-              <span>{language === 'ar' ? 'فكرة مبتكرة للعرض التجريبي' : 'Innovative Demo Concept'}</span>
+              <span>{language === 'ar' ? 'الاستثمار العقاري المشترك' : 'Shared Real Estate Investment'}</span>
             </div>
 
             <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight">
@@ -40,7 +40,7 @@ export const InvestmentTeaser: React.FC = () => {
                 <>
                   استثمر في كبرى العقارات التجارية عبر{' '}
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-gold-300 to-gold-500">
-                    حصص الملكية الجزئية
+                    حصص المشاركة الميسرة
                   </span>
                 </>
               ) : (
@@ -55,8 +55,8 @@ export const InvestmentTeaser: React.FC = () => {
 
             <p className="text-sm text-sand-300 leading-relaxed">
               {language === 'ar'
-                ? 'نموذج توضيحي يُمكّن صغار المستثمرين من تملك حصص بعقارات تجارية وإدارية وملاحية مؤجرة لكيانات دولية وبنوك في حي العرب وحي الشرق وبورفؤاد، والحصول على عوائد إيجارية دورية.'
-                : 'A demo showcase enabling investors to acquire fractional ownership shares in prime commercial and maritime properties in Port Said & Port Fouad with periodic rental distributions.'}
+                ? 'مفهوم استثماري يتيح للمستثمرين المشاركة في ملكية أصول عقارية تجارية وإدارية وملاحية في حي العرب وحي الشرق وبورفؤاد، مع توثيق الحصص والحقوق بعقود قانونية رسمية.'
+                : 'An investment concept enabling investors to participate in commercial and maritime properties in Port Said & Port Fouad with documented legal contracts.'}
             </p>
 
             {/* Value bullets */}
@@ -65,24 +65,24 @@ export const InvestmentTeaser: React.FC = () => {
                 <CheckCircle2 className="w-4 h-4 text-gold-400 shrink-0" />
                 <span>
                   {language === 'ar'
-                    ? 'تبدأ الحصص الاستثمارية من 40,000 ج.م فقط'
-                    : 'Investment shares starting from only 40,000 EGP'}
+                    ? 'إمكانية المشاركة برؤوس أموال ميسرة تبدأ بحصص محددة'
+                    : 'Accessible participation with structured equity shares'}
                 </span>
               </li>
               <li className="flex items-center gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-gold-400 shrink-0" />
                 <span>
                   {language === 'ar'
-                    ? 'عوائد إيجارية سنوية متوقعة بين 14% إلى 18.5%'
-                    : 'Expected annual rental yields between 14% to 18.5%'}
+                    ? 'عوائد إيجارية دورية مرتبطة بالأداء الفعلي لعقود الإيجار التجارية'
+                    : 'Periodic rental cash flows linked to commercial lease agreements'}
                 </span>
               </li>
               <li className="flex items-center gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-gold-400 shrink-0" />
                 <span>
                   {language === 'ar'
-                    ? 'أصول مؤجرة فعلياً بعقود ملزمة طويلة الأجل'
-                    : 'Operating assets backed by long-term corporate leases'}
+                    ? 'أصول واقعية مفحوصة قانونياً وخاضعة للتسجيل والتوثيق'
+                    : 'Tangible real assets backed by verified legal documentation'}
                 </span>
               </li>
             </ul>
@@ -92,8 +92,8 @@ export const InvestmentTeaser: React.FC = () => {
               <ShieldAlert className="w-4 h-4 text-gold-400 shrink-0 mt-0.5" />
               <p>
                 {language === 'ar'
-                  ? 'هذا القسم نموذج توضيحي فقط، ولا يمثل طرحاً مالياً أو جمع أموال حقيقي.'
-                  : 'This section is an architectural demonstration only and does not process real funds.'}
+                  ? 'الاستثمار العقاري يخضع لمخاطر السوق وقوى العرض والطلب؛ المنصة لا تقدم أرباحاً مؤكدة ولا تجمع أموالاً عبر الإنترنت.'
+                  : 'Real estate investment is subject to market risks; we do not guarantee profits or process online fund collections.'}
               </p>
             </div>
 

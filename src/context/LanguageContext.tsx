@@ -96,17 +96,17 @@ const translations: Record<Language, Record<string, string>> = {
     'heading.legalServicesSubtitle': 'نساعدك على فحص الملكية، وصياغة العقود، وإتمام إجراءات الشهر العقاري بأمان تام',
     
     // Disclaimer
-    'disclaimer.prototype': 'نسخة تجريبية (MVP) مخصصة للعرض والعروض التوضيحية وتعمل بالكامل محلياً (localStorage).',
-    'disclaimer.legal': 'جميع المعلومات والخدمات الاستشارية المعروضة على المنصة هي استرشادية وتوضيحية ولا تغني عن الاستشارة القانونية الرسمية.',
-    'disclaimer.investment': 'نموذج حصص الاستثمار هو نموذج تصوري وعرض توضيحي فقط. المنصة لا تقدم وعوداً مالية ولا تجمع أموالاً عبر الإنترنت.',
+    'disclaimer.prototype': 'منصة الحمد للتسويق والاستثمار العقاري والقانوني — بورسعيد.',
+    'disclaimer.legal': 'جميع المعلومات والخدمات الاستشارية المعروضة على المنصة هي استرشادية وتخضع للتوثيق القانوني الرسمي بالشهر العقاري.',
+    'disclaimer.investment': 'الاستثمار في العقارات المشتركة يخضع لدراسات الجدوى وعقود التوثيق الرسمية ولا توجد أرباح مضمونة دون تقييم واقعي للأصل.',
     
     // Footer
-    'footer.description': 'المنصة الرائدة في تسويق وإدارة العقارات والاستثمار والخدمات القانونية.',
+    'footer.description': 'المنصة الرائدة في تسويق وإدارة العقارات والاستثمار والخدمات القانونية بمحافظة بورسعيد وبورفؤاد.',
     'footer.quickLinks': 'روابط سريعة',
     'footer.services': 'خدماتنا',
     'footer.contactUs': 'تواصل معنا',
     'footer.address': 'شارع الجمهورية تقاطع عاطف السادات، بورسعيد، مصر',
-    'footer.phone': '+20 66 320 0000 / +20 100 123 4567',
+    'footer.phone': '01000352695 / +20 66 320 0000',
     'footer.email': 'info@elhamd-realestate.com',
     'footer.rights': 'جميع الحقوق محفوظة © الحمد للتسويق والاستثمار العقاري والقانوني',
   },
@@ -194,17 +194,17 @@ const translations: Record<Language, Record<string, string>> = {
     'heading.legalServicesSubtitle': 'Title deed audits, contract drafting, and notary registration handled safely',
     
     // Disclaimer
-    'disclaimer.prototype': 'Interactive Prototype (MVP) running entirely client-side with localStorage persistence.',
-    'disclaimer.legal': 'All legal information is informational and does not constitute formal legal counsel.',
-    'disclaimer.investment': 'Investment shares are a conceptual demonstration only. No payments are processed online.',
+    'disclaimer.prototype': 'El-Hamd Real Estate & Legal Services — Port Said Edition.',
+    'disclaimer.legal': 'All legal information is advisory and subject to official documentation before the competent notary authorities.',
+    'disclaimer.investment': 'Shared property investments are subject to feasibility diligence and official notarial contracts with zero guaranteed returns.',
     
     // Footer
-    'footer.description': 'Premier platform for luxury real estate marketing, advisory, and fractional investments.',
+    'footer.description': 'Premier platform for real estate marketing, advisory, and shared property investments in Port Said & Port Fouad.',
     'footer.quickLinks': 'Quick Links',
     'footer.services': 'Services',
     'footer.contactUs': 'Contact Us',
     'footer.address': 'El Gomhoureya St at Atef El Sadat, Port Said, Egypt',
-    'footer.phone': '+20 66 320 0000 / +20 100 123 4567',
+    'footer.phone': '+20 100 035 2695 / +20 66 320 0000',
     'footer.email': 'info@elhamd-realestate.com',
     'footer.rights': 'All rights reserved © El-Hamd Real Estate & Legal Services',
   }

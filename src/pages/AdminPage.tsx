@@ -50,7 +50,8 @@ export const AdminPage: React.FC = () => {
     addLegalService,
     updateLegalService,
     deleteLegalService,
-    resetDemoData,
+    cloudStatus,
+    refreshCloudData,
   } = useData();
 
   const { language } = useLanguage();
@@ -148,8 +149,8 @@ export const AdminPage: React.FC = () => {
       amenities: ['أمن 24 ساعة', 'مصعد', 'جراج خاص', 'موقع استراتيجي ببورسعيد'],
       finishingType: 'سوبر لوكس',
       contactName: 'إدارة الحمد للعقارات',
-      contactPhone: '+20 100 123 4567',
-      contactEmail: 'admin@elhamd.local',
+      contactPhone: '01000352695',
+      contactEmail: 'admin@elhamd-realestate.com',
       createdAt: new Date().toISOString(),
     };
 
@@ -165,23 +166,23 @@ export const AdminPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-sand-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        {/* Prototype Header & Disclaimer Banner */}
-        <div className="bg-navy-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-navy-800">
+        {/* Professional Header & Cloud Status */}
+        <div className="bg-navy-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-navy-800 space-y-5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/20 text-gold-300 text-xs font-bold border border-gold-400/30">
                 <LayoutDashboard className="w-3.5 h-3.5" />
-                <span>{language === 'ar' ? 'لوحة تحكم المشرف (إصدار بورسعيد MVP)' : 'Admin Portal (Port Said MVP)'}</span>
+                <span>{language === 'ar' ? 'لوحة تحكم إدارة المنصة — بورسعيد' : 'Admin Portal — Port Said'}</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-white">
                 {language === 'ar'
-                  ? 'إدارة منصة الحمد للتسويق والاستثمار العقاري والقانوني - بورسعيد'
-                  : 'El-Hamd Real Estate & Legal Admin Portal - Port Said'}
+                  ? 'إدارة منصة الحمد للتسويق والاستثمار العقاري والقانوني'
+                  : 'El-Hamd Real Estate & Legal Services Management'}
               </h1>
               <p className="text-xs sm:text-sm text-sand-300 max-w-2xl leading-relaxed">
                 {language === 'ar'
-                  ? 'لوحة إدارة عقارات واستشارات محافظة بورسعيد وبورفؤاد: مراجعة واعتماد عقارات المستخدمين، إدارة طلبات المعاينة، الاستشارات القانونية، وحصص الاستثمار.'
-                  : 'Demonstration console to test full real estate workflows: reviewing and approving listings, managing client inquiries, and legal services in Port Said.'}
+                  ? 'مراجعة واعتماد عقارات المستخدمين في أحياء بورسعيد، إدارة طلبات المعاينة والتواصل، الاستشارات القانونية، وتحديث بيانات الموقع.'
+                  : 'Review and approve Port Said listings, manage inquiries, oversee legal services, and control property publication.'}
               </p>
             </div>
 
@@ -197,23 +198,46 @@ export const AdminPage: React.FC = () => {
               )}
 
               <button
-                onClick={() => {
-                  if (
-                    window.confirm(
-                      language === 'ar'
-                        ? 'هل تريد إعادة ضبط جميع البيانات إلى النسخة الافتراضية لبورسعيد؟'
-                        : 'Reset demo data to initial Port Said defaults?'
-                    )
-                  ) {
-                    resetDemoData();
-                  }
-                }}
-                className="px-4 py-2.5 rounded-xl bg-navy-900 hover:bg-rose-900/60 border border-navy-700 text-rose-300 hover:text-white font-bold text-xs flex items-center gap-2 transition-colors"
+                onClick={() => refreshCloudData()}
+                className="px-4 py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 border border-navy-700 text-gold-300 font-bold text-xs flex items-center gap-2 transition-colors"
               >
                 <RotateCcw className="w-4 h-4" />
-                <span>{language === 'ar' ? 'استعادة البيانات الافتراضية' : 'Reset Demo Data'}</span>
+                <span>{language === 'ar' ? 'تحديث ومزامنة البيانات' : 'Sync & Refresh'}</span>
               </button>
             </div>
+          </div>
+
+          {/* Cloud Storage Connection Status Pill */}
+          <div className="pt-3 border-t border-navy-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2.5">
+              <span
+                className={`w-3 h-3 rounded-full shrink-0 ${
+                  cloudStatus.isConnected
+                    ? 'bg-emerald-400 ring-4 ring-emerald-400/20'
+                    : cloudStatus.isConfigured
+                    ? 'bg-amber-400 ring-4 ring-amber-400/20'
+                    : 'bg-rose-400 ring-4 ring-rose-400/20'
+                }`}
+              />
+              <span className="text-sand-200">
+                <strong className="text-white">
+                  {language === 'ar' ? 'حالة التخزين السحابي (Supabase): ' : 'Cloud Database Status: '}
+                </strong>
+                {cloudStatus.isConnected
+                  ? language === 'ar'
+                    ? 'متصل بنجاح — يتم حفظ كافة العقارات والصور والبيانات سحابياً بشكل دائم.'
+                    : 'Connected — All listings, images, and data are persisted online.'
+                  : cloudStatus.message}
+              </span>
+            </div>
+
+            {!cloudStatus.isConnected && (
+              <span className="text-[11px] text-gold-400 font-medium">
+                {language === 'ar'
+                  ? 'ضع مفاتيح VITE_SUPABASE_URL و VITE_SUPABASE_ANON_KEY في ملف .env للربط الفوري'
+                  : 'Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env to connect'}
+              </span>
+            )}
           </div>
         </div>
 

@@ -103,8 +103,8 @@ export const PropertyDetailsPage: React.FC = () => {
 
   const whatsappMessage = encodeURIComponent(
     language === 'ar'
-      ? `مرحباً، أنا مهتم بالعقار المعروض على دار إستيت: "${property.title}" (كود: ${property.id})، وأرغب في معرفة المزيد.`
-      : `Hello, I'm interested in the property on DarEstate: "${property.titleEn || property.title}" (ID: ${property.id}).`
+      ? `مرحباً، أنا مهتم بالعقار المعروض على منصة الحمد للعقارات: "${property.title}" (كود: ${property.id})، وأرغب في معرفة المزيد.`
+      : `Hello, I'm interested in the property on El-Hamd Real Estate: "${property.titleEn || property.title}" (ID: ${property.id}).`
   );
 
   return (
@@ -337,7 +337,7 @@ export const PropertyDetailsPage: React.FC = () => {
               <ShieldCheck className="w-7 h-7 text-gold-600 shrink-0 mt-1" />
               <div className="space-y-1 text-xs text-navy-700">
                 <h4 className="font-bold text-navy-950 text-sm">
-                  {language === 'ar' ? 'نصيحة دار إستيت للأمان العقاري' : 'DarEstate Real Estate Safety Advisory'}
+                  {language === 'ar' ? 'نصيحة الحمد للأمان العقاري' : 'El-Hamd Real Estate Safety Advisory'}
                 </h4>
                 <p className="leading-relaxed">
                   {language === 'ar'
@@ -388,7 +388,7 @@ export const PropertyDetailsPage: React.FC = () => {
 
                 {/* WhatsApp Direct Chat */}
                 <a
-                  href={`https://wa.me/201001234567?text=${whatsappMessage}`}
+                  href={`https://wa.me/201000352695?text=${whatsappMessage}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full py-3 px-4 rounded-2xl border border-emerald-500/40 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2"

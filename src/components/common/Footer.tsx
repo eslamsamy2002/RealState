@@ -87,9 +87,6 @@ export const Footer: React.FC = () => {
             <p className="text-sm text-navy-300 leading-relaxed max-w-sm">
               {t('footer.description')}
             </p>
-            <div className="pt-2 text-xs text-gold-400/90 bg-gold-500/10 border border-gold-500/20 p-3 rounded-xl">
-              <p className="font-semibold">{t('disclaimer.prototype')}</p>
-            </div>
           </div>
 
           {/* Quick Navigation */}

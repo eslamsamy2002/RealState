@@ -152,12 +152,12 @@ export const PropertiesPage: React.FC = () => {
             <span>{language === 'ar' ? 'العقارات المعتمدة للبيع والإيجار' : 'Verified Listings For Sale & Rent'}</span>
           </div>
           <h1 className="text-2xl sm:text-4xl font-black text-navy-950">
-            {language === 'ar' ? 'دليل العقارات في مصر' : 'Real Estate Catalog in Egypt'}
+            {language === 'ar' ? 'دليل عقارات بورسعيد وبورفؤاد' : 'Real Estate Catalog in Port Said & Port Fouad'}
           </h1>
           <p className="text-xs sm:text-sm text-navy-600 mt-1 max-w-2xl">
             {language === 'ar'
-              ? 'تصفح باقة منتقاة من الشقق السكنية، الفلل المستقلة، المحلات التجارية، والمكاتب الإدارية مع إمكانية التصفية المتقدمة وفق رغبتك.'
-              : 'Browse a vetted selection of apartments, villas, commercial shops, and office spaces with advanced multi-criteria filters.'}
+              ? 'تصفح باقة العقارات السكنية والتجارية المفحوصة والمعتمدة في كافة أحياء محافظة بورسعيد ومدينة بورفؤاد.'
+              : 'Browse vetted residential and commercial listings across all districts of Port Said Governorate.'}
           </p>
         </div>
 
@@ -180,19 +180,53 @@ export const PropertiesPage: React.FC = () => {
               />
             ))}
           </div>
+        ) : publicApprovedProperties.length === 0 ? (
+          /* Empty Database State: No approved properties live yet */
+          <div className="bg-white rounded-3xl border border-sand-200 p-12 text-center max-w-xl mx-auto my-12 shadow-sm space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-gold-50 text-gold-600 flex items-center justify-center mx-auto">
+              <Building2 className="w-8 h-8" />
+            </div>
+            <h3 className="text-lg font-bold text-navy-950">
+              {language === 'ar'
+                ? 'لا توجد عقارات منشورة حالياً في بورسعيد'
+                : 'No Active Listings in Port Said Yet'}
+            </h3>
+            <p className="text-xs sm:text-sm text-navy-600 leading-relaxed">
+              {language === 'ar'
+                ? 'يتم فحص واعتماد العقارات من قبل الإدارة قبل نشرها. يمكنك تقديم عقارك الآن للبيع أو الإيجار، أو التواصل معنا مباشرة.'
+                : 'All listings undergo administrator vetting prior to publication. Be the first to list your property or contact us directly.'}
+            </p>
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a
+                href="/submit-property"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gold-500 hover:bg-gold-600 text-navy-950 font-bold text-xs transition-colors shadow-sm"
+              >
+                {language === 'ar' ? 'أضف عقارك الآن' : 'Submit Property Now'}
+              </a>
+              <a
+                href="https://wa.me/201000352695"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl border border-emerald-500/50 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs transition-colors"
+              >
+                {language === 'ar' ? 'تواصل عبر واتساب' : 'Chat via WhatsApp'}
+              </a>
+            </div>
+          </div>
         ) : (
+          /* Empty Search Filter State */
           <div className="bg-white rounded-3xl border border-sand-200 p-12 text-center max-w-xl mx-auto my-12 shadow-sm">
             <div className="w-16 h-16 rounded-2xl bg-sand-100 text-navy-400 flex items-center justify-center mx-auto mb-4">
               <SearchX className="w-8 h-8" />
             </div>
             <h3 className="text-lg font-bold text-navy-950 mb-2">
               {language === 'ar'
-                ? 'لم يتم العثور على عقارات مطابقة'
-                : 'No Properties Match Your Search'}
+                ? 'لم يتم العثور على عقارات مطابقة لمعايير البحث'
+                : 'No Properties Match Your Search Criteria'}
             </h3>
             <p className="text-xs sm:text-sm text-navy-600 mb-6 leading-relaxed">
               {language === 'ar'
-                ? 'جرّب توسيع نطاق البحث أو تغيير نوع العقار أو إلغاء بعض معايير التصفية للوصول لنتائج أفضل.'
+                ? 'جرّب تغيير الحي أو توسيع نطاق السعر أو إلغاء بعض معايير التصفية للوصول لنتائج أفضل.'
                 : 'Try adjusting your search filters, broadening the price range, or clearing selections.'}
             </p>
             <button

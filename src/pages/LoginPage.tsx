@@ -37,41 +37,56 @@ export const LoginPage: React.FC = () => {
   // Status & Feedback
   const [error, setError] = useState(messageParam);
   const [success, setSuccess] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const res = login(loginEmail, loginPassword);
-    if (!res.success) {
-      setError(res.error || (language === 'ar' ? 'فشل تسجيل الدخول. يرجى التحقق من البيانات.' : 'Login failed. Please check credentials.'));
-      return;
-    }
-
-    setSuccess(language === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Logged in successfully!');
-    setTimeout(() => {
-      if (loginEmail.toLowerCase() === DEFAULT_ADMIN.email.toLowerCase()) {
-        navigate(redirectPath || '/admin');
-      } else {
-        navigate(redirectPath && !redirectPath.includes('/admin') ? redirectPath : '/account');
+    setIsSubmitting(true);
+    try {
+      const res = await login(loginEmail, loginPassword);
+      if (!res.success) {
+        setError(res.error || (language === 'ar' ? 'فشل تسجيل الدخول. يرجى التحقق من البيانات.' : 'Login failed. Please check credentials.'));
+        setIsSubmitting(false);
+        return;
       }
-    }, 600);
+
+      setSuccess(language === 'ar' ? 'تم تسجيل الدخول بنجاح!' : 'Logged in successfully!');
+      setTimeout(() => {
+        if (loginEmail.toLowerCase() === DEFAULT_ADMIN.email.toLowerCase()) {
+          navigate(redirectPath || '/admin');
+        } else {
+          navigate(redirectPath && !redirectPath.includes('/admin') ? redirectPath : '/account');
+        }
+      }, 500);
+    } catch (err: any) {
+      setError(err?.message || (language === 'ar' ? 'حدث خطأ أثناء تسجيل الدخول.' : 'An error occurred during sign in.'));
+      setIsSubmitting(false);
+    }
   };
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    const res = register(regName, regEmail, regPhone, regPassword);
-    if (!res.success) {
-      setError(res.error || (language === 'ar' ? 'فشل إنشاء الحساب.' : 'Registration failed.'));
-      return;
-    }
+    setIsSubmitting(true);
+    try {
+      const res = await register(regName, regEmail, regPhone, regPassword);
+      if (!res.success) {
+        setError(res.error || (language === 'ar' ? 'فشل إنشاء الحساب.' : 'Registration failed.'));
+        setIsSubmitting(false);
+        return;
+      }
 
-    setSuccess(language === 'ar' ? 'تم إنشاء الحساب وتسجيل الدخول بنجاح!' : 'Account registered successfully!');
-    setTimeout(() => {
-      navigate('/account');
-    }, 600);
+      setSuccess(language === 'ar' ? 'تم إنشاء الحساب وتسجيل الدخول بنجاح!' : 'Account registered successfully!');
+      setTimeout(() => {
+        navigate('/account');
+      }, 500);
+    } catch (err: any) {
+      setError(err?.message || (language === 'ar' ? 'حدث خطأ أثناء التسجيل.' : 'An error occurred during registration.'));
+      setIsSubmitting(false);
+    }
   };
 
   return (

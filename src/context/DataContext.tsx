@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   Property,
   Inquiry,
@@ -8,32 +8,63 @@ import {
   InvestmentInquiry,
   UserProfile,
 } from '../types';
-import { INITIAL_PROPERTIES } from '../data/mockProperties';
 import { INITIAL_LEGAL_SERVICES } from '../data/mockLegalServices';
 import { INITIAL_INVESTMENTS } from '../data/mockInvestments';
 import { getFromStorage, saveToStorage, STORAGE_KEYS } from '../utils/storage';
 import { useAuth } from './AuthContext';
+import { isSupabaseConfigured, testSupabaseConnection } from '../services/supabase';
+import {
+  fetchPublicApprovedPropertiesFromDb,
+  fetchAllPropertiesFromDb,
+  insertPropertySubmissionToDb,
+  insertPropertyDirectlyToDb,
+  updatePropertyStatusInDb,
+  updatePropertyInDb,
+  deletePropertyFromDb,
+  insertInquiryToDb,
+  fetchInquiriesFromDb,
+  updateInquiryStatusInDb,
+  deleteInquiryFromDb,
+  insertLegalRequestToDb,
+  fetchLegalRequestsFromDb,
+  updateLegalRequestStatusInDb,
+  insertInvestmentInquiryToDb,
+  fetchInvestmentInquiriesFromDb,
+  updateInvestmentInquiryStatusInDb,
+} from '../services/databaseService';
+
+interface CloudStatus {
+  isConfigured: boolean;
+  isConnected: boolean;
+  message: string;
+}
 
 interface DataContextType {
+  // Cloud Connection Status
+  cloudStatus: CloudStatus;
+  refreshCloudData: () => Promise<void>;
+
   // Properties
   properties: Property[];
   publicApprovedProperties: Property[];
   userProperties: Property[];
   pendingProperties: Property[];
-  addPropertySubmission: (data: Omit<Property, 'id' | 'createdAt' | 'status' | 'submittedByUserId' | 'isUserSubmission'>) => Property;
-  addPropertyDirectly: (property: Property) => void;
-  updateProperty: (property: Property) => void;
-  approveProperty: (id: string) => void;
-  rejectProperty: (id: string, reason?: string) => void;
-  deleteProperty: (id: string) => void;
+  addPropertySubmission: (
+    data: Omit<Property, 'id' | 'createdAt' | 'status' | 'submittedByUserId' | 'isUserSubmission'>
+  ) => Promise<Property>;
+  addPropertyDirectly: (property: Property) => Promise<void>;
+  updateProperty: (property: Property) => Promise<void>;
+  approveProperty: (id: string) => Promise<void>;
+  rejectProperty: (id: string, reason?: string) => Promise<void>;
+  deleteProperty: (id: string) => Promise<void>;
   getPropertyById: (id: string) => Property | undefined;
 
   // Inquiries
   inquiries: Inquiry[];
   userInquiries: Inquiry[];
-  createInquiry: (data: Omit<Inquiry, 'id' | 'createdAt' | 'status' | 'userId'>) => Inquiry;
-  updateInquiryStatus: (id: string, status: Inquiry['status']) => void;
-  deleteInquiry: (id: string) => void;
+  createInquiry: (data: Omit<Inquiry, 'id' | 'createdAt' | 'status' | 'userId'>) => Promise<Inquiry>;
+  updateInquiryStatus: (id: string, status: Inquiry['status']) => Promise<void>;
+  deleteInquiry: (id: string) => Promise<void>;
 
   // Legal Services
   legalServices: LegalService[];
@@ -45,60 +76,53 @@ interface DataContextType {
   // Legal Requests
   legalRequests: LegalRequest[];
   userLegalRequests: LegalRequest[];
-  createLegalRequest: (data: Omit<LegalRequest, 'id' | 'createdAt' | 'status' | 'userId'>) => LegalRequest;
-  updateLegalRequestStatus: (id: string, status: LegalRequest['status']) => void;
+  createLegalRequest: (data: Omit<LegalRequest, 'id' | 'createdAt' | 'status' | 'userId'>) => Promise<LegalRequest>;
+  updateLegalRequestStatus: (id: string, status: LegalRequest['status']) => Promise<void>;
 
   // Investments
   investments: InvestmentShare[];
   investmentInquiries: InvestmentInquiry[];
   userInvestmentInquiries: InvestmentInquiry[];
-  createInvestmentInquiry: (data: Omit<InvestmentInquiry, 'id' | 'createdAt' | 'status' | 'userId'>) => InvestmentInquiry;
-  updateInvestmentInquiryStatus: (id: string, status: InvestmentInquiry['status']) => void;
+  createInvestmentInquiry: (
+    data: Omit<InvestmentInquiry, 'id' | 'createdAt' | 'status' | 'userId'>
+  ) => Promise<InvestmentInquiry>;
+  updateInvestmentInquiryStatus: (id: string, status: InvestmentInquiry['status']) => Promise<void>;
 
-  // Current User
+  // Current User Profile
   currentUser: UserProfile;
   updateCurrentUser: (profile: Partial<UserProfile>) => void;
-
-  // Reset
-  resetDemoData: () => void;
 }
 
-const DEFAULT_USER: UserProfile = {
-  id: 'user-demo-1',
-  name: 'أحمد مصطفى (بورسعيد)',
-  phone: '+20 109 888 7777',
-  email: 'ahmed@elhamd.local',
+const DEFAULT_BLANK_USER: UserProfile = {
+  id: 'guest',
+  name: '',
+  phone: '',
+  email: '',
   role: 'user',
 };
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { currentUser: authUser } = useAuth();
+  const { currentUser: authUser, isAdmin } = useAuth();
 
-  // Properties State
+  // Cloud Status State
+  const [cloudStatus, setCloudStatus] = useState<CloudStatus>({
+    isConfigured: isSupabaseConfigured(),
+    isConnected: false,
+    message: isSupabaseConfigured()
+      ? 'جارٍ الاتصال بقاعدة بيانات Supabase...'
+      : 'لم يتم ربط خدمة Supabase بعد. يرجى إضافة مفاتيح VITE_SUPABASE_URL و VITE_SUPABASE_ANON_KEY في ملف .env.',
+  });
+
+  // Properties State (defaults to storage cache or empty)
   const [properties, setProperties] = useState<Property[]>(() => {
-    return getFromStorage<Property[]>(STORAGE_KEYS.PROPERTIES, INITIAL_PROPERTIES);
+    return getFromStorage<Property[]>(STORAGE_KEYS.PROPERTIES, []);
   });
 
   // Inquiries State
   const [inquiries, setInquiries] = useState<Inquiry[]>(() => {
-    return getFromStorage<Inquiry[]>(STORAGE_KEYS.INQUIRIES, [
-      {
-        id: 'inq-seed-1',
-        propertyId: 'prop-ps-1',
-        propertyTitle: 'شقة فاخرة بإطلالة مباشرة بانورامية على مجرى قناة السويس بحي الشرق',
-        propertyPrice: 5200000,
-        inquiryType: 'buy',
-        userName: 'أحمد مصطفى (بورسعيد)',
-        userPhone: '+20 109 888 7777',
-        userEmail: 'ahmed@elhamd.local',
-        message: 'أرغب في حجز موعد لمعاينة الشقة المطلة على القناة بحي الشرق والاستفسار عن طرق السداد المتاحة.',
-        createdAt: '2025-02-19T14:30:00Z',
-        status: 'new',
-        userId: 'user-demo-1',
-      }
-    ]);
+    return getFromStorage<Inquiry[]>(STORAGE_KEYS.INQUIRIES, []);
   });
 
   // Legal Services State
@@ -108,56 +132,25 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Legal Requests State
   const [legalRequests, setLegalRequests] = useState<LegalRequest[]>(() => {
-    return getFromStorage<LegalRequest[]>(STORAGE_KEYS.LEGAL_REQUESTS, [
-      {
-        id: 'leg-seed-1',
-        serviceId: 'legal-1',
-        serviceTitle: 'فحص سند الملكية والتسلسل القانوني',
-        userName: 'أحمد مصطفى (بورسعيد)',
-        userPhone: '+20 109 888 7777',
-        userEmail: 'ahmed@elhamd.local',
-        propertyLocation: 'بورسعيد - حي الشرق / بورفؤاد',
-        details: 'أريد تدقيق عقد بيع ابتدائي ومستندات ملكية فيلا في بورفؤاد قبل التوقيع وسداد الدفعة الأولى.',
-        preferredTime: 'مساءً بعد الساعة 5',
-        createdAt: '2025-02-18T11:20:00Z',
-        status: 'pending',
-        userId: 'user-demo-1',
-      }
-    ]);
+    return getFromStorage<LegalRequest[]>(STORAGE_KEYS.LEGAL_REQUESTS, []);
   });
 
-  // Investment Shares State
+  // Investment Shares Concept State
   const [investments] = useState<InvestmentShare[]>(() => {
     return getFromStorage<InvestmentShare[]>(STORAGE_KEYS.INVESTMENTS, INITIAL_INVESTMENTS);
   });
 
   // Investment Inquiries State
   const [investmentInquiries, setInvestmentInquiries] = useState<InvestmentInquiry[]>(() => {
-    return getFromStorage<InvestmentInquiry[]>(STORAGE_KEYS.INVESTMENT_INQUIRIES, [
-      {
-        id: 'inv-inq-seed-1',
-        investmentId: 'inv-ps-1',
-        investmentTitle: 'مجمع تجاري ومقرات بنوك - تقاطع الثلاثيني مع محمد علي، حي العرب، بورسعيد',
-        sharePrice: 40000,
-        sharesRequested: 3,
-        totalAmount: 120000,
-        userName: 'أحمد مصطفى (بورسعيد)',
-        userPhone: '+20 109 888 7777',
-        userEmail: 'ahmed@elhamd.local',
-        notes: 'مهتم بتفاصيل توزيع العوائد الإيجارية ربع السنوية للمجمع التجاري بحي العرب.',
-        createdAt: '2025-02-17T09:15:00Z',
-        status: 'new',
-        userId: 'user-demo-1',
-      }
-    ]);
+    return getFromStorage<InvestmentInquiry[]>(STORAGE_KEYS.INVESTMENT_INQUIRIES, []);
   });
 
   // User Profile State
   const [customProfile, setCustomProfile] = useState<UserProfile>(() => {
-    return getFromStorage<UserProfile>(STORAGE_KEYS.USER_PROFILE, DEFAULT_USER);
+    return getFromStorage<UserProfile>(STORAGE_KEYS.USER_PROFILE, DEFAULT_BLANK_USER);
   });
 
-  // Active Effective User (if authenticated, use authUser)
+  // Active Effective User
   const activeUser: UserProfile = authUser
     ? {
         id: authUser.id,
@@ -168,7 +161,61 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     : customProfile;
 
-  // Save to storage on changes
+  // Refresh Cloud Data Callback
+  const refreshCloudData = useCallback(async () => {
+    if (!isSupabaseConfigured()) {
+      setCloudStatus({
+        isConfigured: false,
+        isConnected: false,
+        message: 'بانتظار ربط Supabase: يرجى إضافة مفاتيح VITE_SUPABASE_URL و VITE_SUPABASE_ANON_KEY.',
+      });
+      return;
+    }
+
+    const testRes = await testSupabaseConnection();
+    setCloudStatus({
+      isConfigured: true,
+      isConnected: testRes.connected,
+      message: testRes.message,
+    });
+
+    if (testRes.connected) {
+      try {
+        if (isAdmin) {
+          // Admin sees all properties, inquiries, requests from database
+          const [dbProps, dbInqs, dbLegal, dbInvest] = await Promise.all([
+            fetchAllPropertiesFromDb(),
+            fetchInquiriesFromDb(),
+            fetchLegalRequestsFromDb(),
+            fetchInvestmentInquiriesFromDb(),
+          ]);
+
+          setProperties(dbProps);
+          setInquiries(dbInqs);
+          setLegalRequests(dbLegal);
+          setInvestmentInquiries(dbInvest);
+          saveToStorage(STORAGE_KEYS.PROPERTIES, dbProps);
+          saveToStorage(STORAGE_KEYS.INQUIRIES, dbInqs);
+          saveToStorage(STORAGE_KEYS.LEGAL_REQUESTS, dbLegal);
+          saveToStorage(STORAGE_KEYS.INVESTMENT_INQUIRIES, dbInvest);
+        } else {
+          // Public visitor only gets approved properties
+          const publicProps = await fetchPublicApprovedPropertiesFromDb();
+          setProperties(publicProps);
+          saveToStorage(STORAGE_KEYS.PROPERTIES, publicProps);
+        }
+      } catch (err) {
+        console.error('Error syncing with Supabase:', err);
+      }
+    }
+  }, [isAdmin]);
+
+  // Initial cloud sync on mount and when admin changes
+  useEffect(() => {
+    refreshCloudData();
+  }, [refreshCloudData]);
+
+  // Local storage cache persistence
   useEffect(() => {
     saveToStorage(STORAGE_KEYS.PROPERTIES, properties);
   }, [properties]);
@@ -193,87 +240,142 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     saveToStorage(STORAGE_KEYS.USER_PROFILE, customProfile);
   }, [customProfile]);
 
-  // Derived collections
+  // Derived Collections
   const publicApprovedProperties = properties.filter((p) => p.status === 'approved');
-  const userProperties = properties.filter((p) => p.submittedByUserId === activeUser.id);
+  const userProperties = activeUser.id && activeUser.id !== 'guest'
+    ? properties.filter((p) => p.submittedByUserId === activeUser.id)
+    : [];
   const pendingProperties = properties.filter((p) => p.status === 'pending');
   const activeLegalServices = legalServices.filter((s) => s.isActive);
-  const userInquiries = inquiries.filter((inq) => inq.userId === activeUser.id);
-  const userLegalRequests = legalRequests.filter((req) => req.userId === activeUser.id);
-  const userInvestmentInquiries = investmentInquiries.filter((inv) => inv.userId === activeUser.id);
+  const userInquiries = activeUser.id && activeUser.id !== 'guest'
+    ? inquiries.filter((inq) => inq.userId === activeUser.id)
+    : [];
+  const userLegalRequests = activeUser.id && activeUser.id !== 'guest'
+    ? legalRequests.filter((req) => req.userId === activeUser.id)
+    : [];
+  const userInvestmentInquiries = activeUser.id && activeUser.id !== 'guest'
+    ? investmentInquiries.filter((inv) => inv.userId === activeUser.id)
+    : [];
 
+  // ==========================================
   // Property Actions
-  const addPropertySubmission = (
+  // ==========================================
+
+  const addPropertySubmission = async (
     data: Omit<Property, 'id' | 'createdAt' | 'status' | 'submittedByUserId' | 'isUserSubmission'>
-  ): Property => {
+  ): Promise<Property> => {
+    const uniqueNum = Math.random().toString(36).substring(2, 7).toUpperCase();
     const newProperty: Property = {
       ...data,
-      id: `prop-ps-${Date.now()}`,
+      id: `PROP-PS-${Date.now().toString(36).toUpperCase()}-${uniqueNum}`,
       createdAt: new Date().toISOString(),
       status: 'pending',
       isUserSubmission: true,
-      submittedByUserId: activeUser.id,
+      submittedByUserId: activeUser.id !== 'guest' ? activeUser.id : undefined,
     };
+
     setProperties((prev) => [newProperty, ...prev]);
+
+    if (cloudStatus.isConnected) {
+      await insertPropertySubmissionToDb(newProperty);
+    }
+
     return newProperty;
   };
 
-  const addPropertyDirectly = (property: Property) => {
+  const addPropertyDirectly = async (property: Property) => {
     setProperties((prev) => [property, ...prev]);
+
+    if (cloudStatus.isConnected) {
+      await insertPropertyDirectlyToDb(property);
+    }
   };
 
-  const updateProperty = (updated: Property) => {
+  const updateProperty = async (updated: Property) => {
     setProperties((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+
+    if (cloudStatus.isConnected) {
+      await updatePropertyInDb(updated);
+    }
   };
 
-  const approveProperty = (id: string) => {
+  const approveProperty = async (id: string) => {
     setProperties((prev) =>
       prev.map((p) => (p.id === id ? { ...p, status: 'approved', rejectionReason: undefined } : p))
     );
+
+    if (cloudStatus.isConnected) {
+      await updatePropertyStatusInDb(id, 'approved');
+    }
   };
 
-  const rejectProperty = (id: string, reason?: string) => {
+  const rejectProperty = async (id: string, reason?: string) => {
+    const cleanReason = reason || 'لم يستوفِ الشروط والضوابط المعتمدة في بورسعيد';
     setProperties((prev) =>
-      prev.map((p) =>
-        p.id === id
-          ? { ...p, status: 'rejected', rejectionReason: reason || 'لم يستوفِ الشروط والضوابط المعتمدة ببورسعيد' }
-          : p
-      )
+      prev.map((p) => (p.id === id ? { ...p, status: 'rejected', rejectionReason: cleanReason } : p))
     );
+
+    if (cloudStatus.isConnected) {
+      await updatePropertyStatusInDb(id, 'rejected', cleanReason);
+    }
   };
 
-  const deleteProperty = (id: string) => {
+  const deleteProperty = async (id: string) => {
     setProperties((prev) => prev.filter((p) => p.id !== id));
+
+    if (cloudStatus.isConnected) {
+      await deletePropertyFromDb(id);
+    }
   };
 
   const getPropertyById = (id: string): Property | undefined => {
     return properties.find((p) => p.id === id);
   };
 
+  // ==========================================
   // Inquiry Actions
-  const createInquiry = (
+  // ==========================================
+
+  const createInquiry = async (
     data: Omit<Inquiry, 'id' | 'createdAt' | 'status' | 'userId'>
-  ): Inquiry => {
+  ): Promise<Inquiry> => {
     const newInquiry: Inquiry = {
       ...data,
-      id: `inq-${Date.now()}`,
+      id: `INQ-${Date.now()}`,
       createdAt: new Date().toISOString(),
       status: 'new',
-      userId: activeUser.id,
+      userId: activeUser.id !== 'guest' ? activeUser.id : undefined,
     };
+
     setInquiries((prev) => [newInquiry, ...prev]);
+
+    if (cloudStatus.isConnected) {
+      await insertInquiryToDb(newInquiry);
+    }
+
     return newInquiry;
   };
 
-  const updateInquiryStatus = (id: string, status: Inquiry['status']) => {
+  const updateInquiryStatus = async (id: string, status: Inquiry['status']) => {
     setInquiries((prev) => prev.map((inq) => (inq.id === id ? { ...inq, status } : inq)));
+
+    if (cloudStatus.isConnected) {
+      await updateInquiryStatusInDb(id, status);
+    }
   };
 
-  const deleteInquiry = (id: string) => {
+  const deleteInquiry = async (id: string) => {
     setInquiries((prev) => prev.filter((inq) => inq.id !== id));
+
+    if (cloudStatus.isConnected) {
+      await deleteInquiryFromDb(id);
+    }
   };
 
+  // ==========================================
   // Legal Services Actions
+  // ==========================================
+
   const addLegalService = (serviceData: Omit<LegalService, 'id'>): LegalService => {
     const newService: LegalService = {
       ...serviceData,
@@ -291,69 +393,85 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLegalServices((prev) => prev.filter((s) => s.id !== id));
   };
 
+  // ==========================================
   // Legal Request Actions
-  const createLegalRequest = (
+  // ==========================================
+
+  const createLegalRequest = async (
     data: Omit<LegalRequest, 'id' | 'createdAt' | 'status' | 'userId'>
-  ): LegalRequest => {
+  ): Promise<LegalRequest> => {
     const newRequest: LegalRequest = {
       ...data,
-      id: `leg-req-${Date.now()}`,
+      id: `LEG-${Date.now()}`,
       createdAt: new Date().toISOString(),
       status: 'pending',
-      userId: activeUser.id,
+      userId: activeUser.id !== 'guest' ? activeUser.id : undefined,
     };
+
     setLegalRequests((prev) => [newRequest, ...prev]);
+
+    if (cloudStatus.isConnected) {
+      await insertLegalRequestToDb(newRequest);
+    }
+
     return newRequest;
   };
 
-  const updateLegalRequestStatus = (id: string, status: LegalRequest['status']) => {
+  const updateLegalRequestStatus = async (id: string, status: LegalRequest['status']) => {
     setLegalRequests((prev) => prev.map((req) => (req.id === id ? { ...req, status } : req)));
+
+    if (cloudStatus.isConnected) {
+      await updateLegalRequestStatusInDb(id, status);
+    }
   };
 
+  // ==========================================
   // Investment Inquiries Actions
-  const createInvestmentInquiry = (
+  // ==========================================
+
+  const createInvestmentInquiry = async (
     data: Omit<InvestmentInquiry, 'id' | 'createdAt' | 'status' | 'userId'>
-  ): InvestmentInquiry => {
+  ): Promise<InvestmentInquiry> => {
     const newInquiry: InvestmentInquiry = {
       ...data,
-      id: `inv-inq-${Date.now()}`,
+      id: `INV-${Date.now()}`,
       createdAt: new Date().toISOString(),
       status: 'new',
-      userId: activeUser.id,
+      userId: activeUser.id !== 'guest' ? activeUser.id : undefined,
     };
+
     setInvestmentInquiries((prev) => [newInquiry, ...prev]);
+
+    if (cloudStatus.isConnected) {
+      await insertInvestmentInquiryToDb(newInquiry);
+    }
+
     return newInquiry;
   };
 
-  const updateInvestmentInquiryStatus = (id: string, status: InvestmentInquiry['status']) => {
-    setInvestmentInquiries((prev) => prev.map((inv) => (inv.id === id ? { ...inv, status } : inv)));
+  const updateInvestmentInquiryStatus = async (
+    id: string,
+    status: InvestmentInquiry['status']
+  ) => {
+    setInvestmentInquiries((prev) =>
+      prev.map((inv) => (inv.id === id ? { ...inv, status } : inv))
+    );
+
+    if (cloudStatus.isConnected) {
+      await updateInvestmentInquiryStatusInDb(id, status);
+    }
   };
 
-  // Current User Action
   const updateCurrentUser = (profile: Partial<UserProfile>) => {
     setCustomProfile((prev) => ({ ...prev, ...profile }));
-  };
-
-  // Reset demo data to defaults
-  const resetDemoData = () => {
-    setProperties(INITIAL_PROPERTIES);
-    setLegalServices(INITIAL_LEGAL_SERVICES);
-    saveToStorage(STORAGE_KEYS.PROPERTIES, INITIAL_PROPERTIES);
-    saveToStorage(STORAGE_KEYS.LEGAL_SERVICES, INITIAL_LEGAL_SERVICES);
-    saveToStorage(STORAGE_KEYS.INVESTMENTS, INITIAL_INVESTMENTS);
-    setInquiries([]);
-    setLegalRequests([]);
-    setInvestmentInquiries([]);
-    saveToStorage(STORAGE_KEYS.INQUIRIES, []);
-    saveToStorage(STORAGE_KEYS.LEGAL_REQUESTS, []);
-    saveToStorage(STORAGE_KEYS.INVESTMENT_INQUIRIES, []);
-    setCustomProfile(DEFAULT_USER);
-    saveToStorage(STORAGE_KEYS.USER_PROFILE, DEFAULT_USER);
   };
 
   return (
     <DataContext.Provider
       value={{
+        cloudStatus,
+        refreshCloudData,
+
         properties,
         publicApprovedProperties,
         userProperties,
@@ -391,8 +509,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         currentUser: activeUser,
         updateCurrentUser,
-
-        resetDemoData,
       }}
     >
       {children}

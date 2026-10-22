@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { PropertyType, PropertyPurpose } from '../types';
 import { PORT_SAID_DISTRICTS } from '../data/portSaidLocations';
+import { uploadPropertyImage } from '../services/storageService';
 import {
   PlusCircle,
   Clock,
@@ -13,37 +15,20 @@ import {
   Image as ImageIcon,
   CheckCircle2,
   AlertCircle,
+  Upload,
+  X,
+  Copy,
+  Check,
+  Sparkles,
+  Layers,
   ArrowRight,
   ArrowLeft,
-  Sparkles,
 } from 'lucide-react';
 
-const SAMPLE_IMAGES = [
-  {
-    labelAr: 'شقة فاخرة / حي الشرق',
-    labelEn: 'Luxury Apartment / El Shark',
-    url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
-  },
-  {
-    labelAr: 'فيلا راقية بحديقة / بورفؤاد',
-    labelEn: 'Villa with Garden / Port Fouad',
-    url: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80',
-  },
-  {
-    labelAr: 'محل تجاري / حي العرب',
-    labelEn: 'Commercial Store / El Arab',
-    url: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80',
-  },
-  {
-    labelAr: 'مكتب إداري ملاحي / حي المناخ',
-    labelEn: 'Maritime Office / El Manakh',
-    url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80',
-  },
-];
-
 export const SubmitPropertyPage: React.FC = () => {
-  const { addPropertySubmission, currentUser } = useData();
+  const { addPropertySubmission } = useData();
   const { language, isRTL } = useLanguage();
+  const { currentUser: authUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   // Form State
@@ -56,14 +41,22 @@ export const SubmitPropertyPage: React.FC = () => {
   const [area, setArea] = useState<number | ''>('');
   const [bedrooms, setBedrooms] = useState<number>(3);
   const [bathrooms, setBathrooms] = useState<number>(2);
-  const [city, setCity] = useState('بورسعيد');
+  const [city] = useState('بورسعيد');
   const [district, setDistrict] = useState('حي الشرق');
   const [address, setAddress] = useState('');
-  const [imageUrl, setImageUrl] = useState(SAMPLE_IMAGES[0].url);
   const [finishingType, setFinishingType] = useState('سوبر لوكس');
-  const [contactName, setContactName] = useState(currentUser.name || '');
-  const [contactPhone, setContactPhone] = useState(currentUser.phone || '');
-  const [contactEmail, setContactEmail] = useState(currentUser.email || '');
+
+  // Images state (file uploads & previews)
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [imageUrlInput, setImageUrlInput] = useState('');
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Contact Info
+  const [contactName, setContactName] = useState(authUser?.name || '');
+  const [contactPhone, setContactPhone] = useState(authUser?.phone || '');
+  const [contactEmail, setContactEmail] = useState(authUser?.email || '');
 
   // Amenities checklist
   const [amenities, setAmenities] = useState<string[]>([
@@ -71,7 +64,10 @@ export const SubmitPropertyPage: React.FC = () => {
     'أمن وحراسة 24/7',
   ]);
 
+  // Submission State
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedPropertyId, setSubmittedPropertyId] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState(false);
   const [error, setError] = useState('');
 
   const toggleAmenity = (item: string) => {
@@ -80,8 +76,69 @@ export const SubmitPropertyPage: React.FC = () => {
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Handle local file selection and upload
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploadError('');
+    setIsUploadingImage(true);
+
+    const newUploadedUrls: string[] = [];
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const res = await uploadPropertyImage(file);
+      if (res.success && res.url) {
+        newUploadedUrls.push(res.url);
+      } else {
+        setUploadError(res.error || 'فشل رفع إحدى الصور. يرجى التأكد من الحجم والصيغة.');
+      }
+    }
+
+    if (newUploadedUrls.length > 0) {
+      setUploadedImages((prev) => [...prev, ...newUploadedUrls]);
+    }
+
+    setIsUploadingImage(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Add image by URL
+  const handleAddImageUrl = () => {
+    const clean = imageUrlInput.trim();
+    if (!clean) return;
+    if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
+      setUploadError(
+        language === 'ar'
+          ? 'يرجى إدخال رابط صورة صحيح يبدأ بـ https://'
+          : 'Please enter a valid image URL starting with https://'
+      );
+      return;
+    }
+    setUploadedImages((prev) => [...prev, clean]);
+    setImageUrlInput('');
+    setUploadError('');
+  };
+
+  const handleRemoveImage = (indexToRemove: number) => {
+    setUploadedImages((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  const handleCopyId = () => {
+    if (!submittedPropertyId) return;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(submittedPropertyId);
+      setCopiedId(true);
+      setTimeout(() => setCopiedId(false), 3000);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
     if (!title.trim() || !description.trim() || !price || !area || !address.trim()) {
       setError(
         language === 'ar'
@@ -94,42 +151,70 @@ export const SubmitPropertyPage: React.FC = () => {
     if (!contactName.trim() || !contactPhone.trim()) {
       setError(
         language === 'ar'
-          ? 'يرجى إدخال بيانات الاتصال (الاسم ورقم الهاتف).'
+          ? 'يرجى إدخال بيانات التواصل (الاسم ورقم الهاتف / واتساب).'
           : 'Please enter your contact details (name and phone).'
       );
       return;
     }
 
-    const created = addPropertySubmission({
-      title: title.trim(),
-      titleEn: title.trim(),
-      description: description.trim(),
-      descriptionEn: description.trim(),
-      type,
-      purpose,
-      price: Number(price),
-      rentFrequency: purpose === 'rent' ? rentFrequency : undefined,
-      area: Number(area),
-      bedrooms: Number(bedrooms),
-      bathrooms: Number(bathrooms),
-      location: {
-        city,
-        cityEn: city,
-        district,
-        districtEn: district,
-        address: address.trim(),
-      },
-      featured: false,
-      primaryImage: imageUrl.trim() || SAMPLE_IMAGES[0].url,
-      images: [imageUrl.trim() || SAMPLE_IMAGES[0].url],
-      amenities,
-      finishingType,
-      contactName: contactName.trim(),
-      contactPhone: contactPhone.trim(),
-      contactEmail: contactEmail.trim(),
-    });
+    const defaultFallbackImage =
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80';
+    const finalImages = uploadedImages.length > 0 ? uploadedImages : [defaultFallbackImage];
+    const primaryImage = finalImages[0];
 
-    setSubmittedPropertyId(created.id);
+    setIsSubmitting(true);
+    try {
+      const created = await addPropertySubmission({
+        title: title.trim(),
+        titleEn: title.trim(),
+        description: description.trim(),
+        descriptionEn: description.trim(),
+        type,
+        purpose,
+        price: Number(price),
+        rentFrequency: purpose === 'rent' ? rentFrequency : undefined,
+        area: Number(area),
+        bedrooms: Number(bedrooms),
+        bathrooms: Number(bathrooms),
+        location: {
+          city,
+          cityEn: 'Port Said',
+          district,
+          districtEn: district,
+          address: address.trim(),
+        },
+        featured: false,
+        primaryImage,
+        images: finalImages,
+        amenities,
+        finishingType,
+        contactName: contactName.trim(),
+        contactPhone: contactPhone.trim(),
+        contactEmail: contactEmail.trim(),
+      });
+
+      setSubmittedPropertyId(created.id);
+    } catch (err: any) {
+      setError(
+        err?.message ||
+          (language === 'ar'
+            ? 'حدث خطأ أثناء حفظ طلب إضافة العقار. يرجى المحاولة مرة أخرى.'
+            : 'An error occurred while submitting your property.')
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleResetForm = () => {
+    setTitle('');
+    setDescription('');
+    setPrice('');
+    setArea('');
+    setAddress('');
+    setUploadedImages([]);
+    setSubmittedPropertyId(null);
+    setError('');
   };
 
   const ArrowIcon = isRTL ? ArrowLeft : ArrowRight;
@@ -144,34 +229,76 @@ export const SubmitPropertyPage: React.FC = () => {
               <Clock className="w-10 h-10 animate-pulse" />
             </div>
 
-            <div className="space-y-2">
-              <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold inline-block">
-                {language === 'ar' ? 'الحالة: قيد المراجعة والاعتماد' : 'Status: Pending Review'}
+            <div className="space-y-3">
+              <span className="px-3.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-300 text-xs font-bold inline-block">
+                {language === 'ar' ? 'الحالة: قيد المراجعة الإدارية' : 'Status: Pending Administrator Review'}
               </span>
+
               <h1 className="text-2xl sm:text-3xl font-black text-navy-950">
-                {language === 'ar' ? 'تم استلام طلب إضافة العقار بنجاح!' : 'Listing Submitted Successfully!'}
+                {language === 'ar' ? 'تم استلام عقارك بنجاح!' : 'Listing Submitted Successfully!'}
               </h1>
+
               <p className="text-sm text-navy-600 max-w-lg mx-auto leading-relaxed">
                 {language === 'ar'
-                  ? 'تم حفظ العقار بنجاح في النظام وتعيين حالته إلى "قيد المراجعة". لن يظهر العقار في القوائم العامة للزوار إلا بعد مراجعته واعتماده من قبل الإدارة لضمان جودة ومصداقية الإعلانات.'
-                  : 'Your property has been submitted and marked as "Pending Review". It will become publicly visible once approved by an administrator to maintain high listing quality.'}
+                  ? 'تم حفظ بيانات عقارك في النظام وتعيين حالته إلى "قيد المراجعة". لن يظهر العقار في القوائم العامة إلا بعد مراجعته واعتماده من قبل الإدارة لضمان جودة ومصداقية الإعلانات المعروضة في بورسعيد.'
+                  : 'Your property has been saved with "Pending Review" status. It will become publicly visible once approved by an administrator to maintain high listing quality in Port Said.'}
               </p>
+            </div>
+
+            {/* Assigned Tracking ID Box */}
+            <div className="max-w-md mx-auto p-4 rounded-2xl bg-sand-100/80 border border-sand-200 flex items-center justify-between gap-3">
+              <div className="text-right">
+                <span className="text-[11px] font-bold text-navy-500 block">
+                  {language === 'ar' ? 'الرقم المرجعي للعقار:' : 'Property Tracking ID:'}
+                </span>
+                <span className="text-base font-black text-navy-950 font-mono" dir="ltr">
+                  {submittedPropertyId}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyId}
+                className="px-3 py-2 rounded-xl bg-white hover:bg-gold-50 text-navy-900 border border-sand-300 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
+              >
+                {copiedId ? (
+                  <>
+                    <Check className="w-4 h-4 text-emerald-600" />
+                    <span className="text-emerald-700">{language === 'ar' ? 'تم النسخ' : 'Copied'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 text-navy-600" />
+                    <span>{language === 'ar' ? 'نسخ الكود' : 'Copy'}</span>
+                  </>
+                )}
+              </button>
             </div>
 
             {/* Quick action buttons */}
             <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
-                to="/account"
+                to="/properties"
                 className="w-full sm:w-auto px-6 py-3 rounded-xl bg-navy-900 text-white font-bold text-sm hover:bg-navy-800 transition-colors shadow-md"
               >
-                {language === 'ar' ? 'متابعة حالة العقار في حسابي' : 'Track Status in My Account'}
+                {language === 'ar' ? 'تصفح العقارات المعتمدة' : 'Browse Verified Listings'}
               </Link>
-              <Link
-                to="/admin"
-                className="w-full sm:w-auto px-6 py-3 rounded-xl border border-gold-500/50 bg-gold-50 text-navy-900 font-bold text-sm hover:bg-gold-100 transition-colors"
+
+              {isAuthenticated && (
+                <Link
+                  to="/account"
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl border border-sand-300 bg-white text-navy-900 font-bold text-sm hover:bg-sand-50 transition-colors"
+                >
+                  {language === 'ar' ? 'متابعة عقاراتي في حسابي' : 'Track in My Account'}
+                </Link>
+              )}
+
+              <button
+                type="button"
+                onClick={handleResetForm}
+                className="w-full sm:w-auto px-6 py-3 rounded-xl border border-gold-500/50 bg-gold-50 text-navy-950 font-bold text-sm hover:bg-gold-100 transition-colors"
               >
-                {language === 'ar' ? 'الانتقال للوحة الإدارة لمراجعته فوراً (تجريبي)' : 'Go to Admin Portal to Review Now'}
-              </Link>
+                {language === 'ar' ? 'إضافة عقار آخر' : 'Submit Another Property'}
+              </button>
             </div>
           </div>
         ) : (
@@ -183,26 +310,26 @@ export const SubmitPropertyPage: React.FC = () => {
                 <span>{language === 'ar' ? 'إضافة عقار جديد' : 'Submit Property Listing'}</span>
               </div>
               <h1 className="text-2xl sm:text-4xl font-black text-navy-950">
-                {language === 'ar' ? 'اعرض عقارك للبيع أو الإيجار' : 'List Your Property for Sale or Rent'}
+                {language === 'ar' ? 'اعرض عقارك في بورسعيد للبيع أو الإيجار' : 'List Your Port Said Property for Sale or Rent'}
               </h1>
               <p className="text-xs sm:text-sm text-navy-600 mt-2 max-w-2xl">
                 {language === 'ar'
-                  ? 'أدخل بيانات عقارك بدقة للوصول إلى آلاف المشترين والمستأجرين المهتمين في مصر.'
-                  : 'Provide accurate property details to connect with thousands of active buyers and tenants.'}
+                  ? 'أدخل بيانات عقارك بدقة للوصول إلى المشترين والمستأجرين المهتمين. لا يُشترط إنشاء حساب لإضافة العقار.'
+                  : 'Submit your property details to reach active buyers and tenants. Registration is completely optional.'}
               </p>
             </div>
 
-            {/* Prominent Admin Approval Disclaimer Notice */}
+            {/* Approval Notice */}
             <div className="p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-start gap-3.5 shadow-sm">
               <Clock className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
               <div className="text-xs text-amber-900 leading-relaxed">
                 <p className="font-bold mb-0.5">
-                  {language === 'ar' ? 'تنويه هام بشأن اعتماد الإعلانات:' : 'Important Notice Regarding Listing Approvals:'}
+                  {language === 'ar' ? 'تنويه هام بشأن نشر العقارات:' : 'Notice Regarding Listing Publication:'}
                 </p>
                 <p>
                   {language === 'ar'
-                    ? 'يتم إدراج جميع العقارات الجديدة بحالة "قيد المراجعة (Pending Approval)" ولا تصبح مرئية للجمهور في صفحة العقارات إلا بعد قيام مسؤول المنصة بمراجعة البيانات واعتمادها. يمكنك اختبار هذه الدورة الكاملة مباشرة عبر لوحة الإدارة.'
-                    : 'All submitted listings are saved with "Pending Approval" status and remain invisible to the public until approved by an administrator in the admin portal.'}
+                    ? 'يتم إدراج جميع العقارات الجديدة بحالة "قيد المراجعة" لحماية المشترين والتأكد من مطابقة الأسعار والبيانات. تظهر العقارات فور قيام إدارة المنصة بمراجعتها واعتمادها.'
+                    : 'All submitted listings are placed in "Pending Approval" status. They are published to the public website once vetted by platform administrators.'}
                 </p>
               </div>
             </div>
@@ -259,8 +386,8 @@ export const SubmitPropertyPage: React.FC = () => {
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder={
                       language === 'ar'
-                        ? 'مثال: شقة للبيع بتشطيب فاخر وفيو مميز بالتجمع الخامس'
-                        : 'e.g. Luxury Apartment for Sale with Garden View in New Cairo'
+                        ? 'مثال: شقة للبيع بتشطيب فاخر وإطلالة مباشرة على القناة بحي الشرق'
+                        : 'e.g. Luxury Apartment for Sale with Canal View in El Shark'
                     }
                     className="w-full px-4 py-2.5 rounded-xl border border-sand-300 text-sm text-navy-900 focus:outline-none focus:ring-2 focus:ring-gold-500/50"
                   />
@@ -395,7 +522,7 @@ export const SubmitPropertyPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Section 3: Location */}
+              {/* Section 3: Port Said District & Address */}
               <div>
                 <h3 className="text-base font-bold text-navy-950 border-b border-sand-200 pb-3 mb-5 flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-gold-600" />
@@ -457,51 +584,116 @@ export const SubmitPropertyPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Section 4: Property Image */}
+              {/* Section 4: Property Images (Persistent File Upload) */}
               <div>
                 <h3 className="text-base font-bold text-navy-950 border-b border-sand-200 pb-3 mb-5 flex items-center gap-2">
                   <ImageIcon className="w-4 h-4 text-gold-600" />
-                  <span>{language === 'ar' ? '4. صورة العقار' : '4. Property Photo'}</span>
+                  <span>{language === 'ar' ? '4. صور العقار' : '4. Property Images'}</span>
                 </h3>
 
-                {/* Quick preset selector */}
+                {/* File Upload Zone */}
                 <div className="mb-4">
-                  <label className="block text-xs font-bold text-navy-700 mb-2">
-                    {language === 'ar' ? 'اختر صورة جاهزة عالية الجودة، أو ضع رابط صورتك أدناه:' : 'Quick sample image selection:'}
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {SAMPLE_IMAGES.map((sample, idx) => (
-                      <button
-                        type="button"
-                        key={idx}
-                        onClick={() => setImageUrl(sample.url)}
-                        className={`relative rounded-xl overflow-hidden aspect-[16/10] border-2 transition-all group ${
-                          imageUrl === sample.url
-                            ? 'border-gold-500 ring-2 ring-gold-400/40 scale-102'
-                            : 'border-sand-200 hover:border-gold-300 opacity-80 hover:opacity-100'
-                        }`}
-                      >
-                        <img src={sample.url} alt={sample.labelAr} className="w-full h-full object-cover" />
-                        <span className="absolute bottom-0 inset-x-0 bg-navy-950/80 text-[10px] text-white p-1 text-center truncate">
-                          {language === 'ar' ? sample.labelAr : sample.labelEn}
-                        </span>
-                      </button>
-                    ))}
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-sand-300 hover:border-gold-500 rounded-2xl p-6 sm:p-8 text-center cursor-pointer bg-sand-50/50 hover:bg-gold-50/20 transition-all space-y-3"
+                  >
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      multiple
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                    />
+                    <div className="w-12 h-12 rounded-full bg-gold-100 text-gold-700 flex items-center justify-center mx-auto">
+                      <Upload className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-navy-950">
+                        {language === 'ar'
+                          ? 'اضغط هنا لرفع صور العقار من جهازك'
+                          : 'Click to upload property images from your device'}
+                      </p>
+                      <p className="text-xs text-navy-500 mt-1">
+                        {language === 'ar'
+                          ? 'الصيغ المدعومة: JPG، PNG، WEBP (الحد الأقصى 5 ميجابايت لكل صورة)'
+                          : 'Supported: JPG, PNG, WEBP (Max 5MB per file)'}
+                      </p>
+                    </div>
+                    {isUploadingImage && (
+                      <div className="text-xs text-gold-700 font-bold animate-pulse">
+                        {language === 'ar' ? 'جارٍ رفع الصورة وتأمينها...' : 'Uploading & securing image...'}
+                      </div>
+                    )}
                   </div>
+
+                  {uploadError && (
+                    <div className="mt-2 text-xs text-rose-600 font-bold flex items-center gap-1.5">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>{uploadError}</span>
+                    </div>
+                  )}
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-navy-700 mb-1.5">
-                    {language === 'ar' ? 'رابط الصورة (Image URL) *' : 'Image URL *'}
+                {/* Uploaded Images Gallery Preview */}
+                {uploadedImages.length > 0 && (
+                  <div className="mb-4 space-y-2">
+                    <label className="block text-xs font-bold text-navy-700">
+                      {language === 'ar'
+                        ? `الصور المرفوعة (${uploadedImages.length}):`
+                        : `Uploaded Images (${uploadedImages.length}):`}
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {uploadedImages.map((imgUrl, idx) => (
+                        <div
+                          key={idx}
+                          className="relative rounded-xl overflow-hidden aspect-[16/10] border border-sand-200 group bg-sand-100"
+                        >
+                          <img
+                            src={imgUrl}
+                            alt={`Uploaded ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          {idx === 0 && (
+                            <span className="absolute top-1.5 start-1.5 px-2 py-0.5 rounded-md bg-navy-950/80 text-gold-300 text-[10px] font-bold">
+                              {language === 'ar' ? 'الرئيسية' : 'Primary'}
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(idx)}
+                            className="absolute top-1.5 end-1.5 p-1 rounded-full bg-rose-600 text-white hover:bg-rose-700 transition-colors shadow-sm"
+                            title={language === 'ar' ? 'حذف الصورة' : 'Remove Image'}
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Optional URL input as alternative */}
+                <div className="pt-2">
+                  <label className="block text-xs font-semibold text-navy-600 mb-1.5">
+                    {language === 'ar' ? 'أو يمكنك إضافة صورة عبر الرابط المباشر:' : 'Or add via image URL:'}
                   </label>
-                  <input
-                    type="url"
-                    required
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    placeholder="https://..."
-                    className="w-full px-4 py-2.5 rounded-xl border border-sand-300 text-sm text-navy-900 focus:outline-none focus:ring-2 focus:ring-gold-500/50"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="url"
+                      value={imageUrlInput}
+                      onChange={(e) => setImageUrlInput(e.target.value)}
+                      placeholder="https://..."
+                      className="flex-1 px-4 py-2 rounded-xl border border-sand-300 text-xs text-navy-900 focus:outline-none focus:ring-2 focus:ring-gold-500/50"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddImageUrl}
+                      className="px-4 py-2 rounded-xl bg-navy-900 text-white text-xs font-bold hover:bg-navy-800 transition-colors"
+                    >
+                      {language === 'ar' ? 'إضافة الرابط' : 'Add URL'}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -522,6 +714,7 @@ export const SubmitPropertyPage: React.FC = () => {
                       required
                       value={contactName}
                       onChange={(e) => setContactName(e.target.value)}
+                      placeholder={language === 'ar' ? 'الاسم بالكامل' : 'Full Name'}
                       className="w-full px-4 py-2.5 rounded-xl border border-sand-300 text-sm text-navy-900 focus:outline-none focus:ring-2 focus:ring-gold-500/50"
                     />
                   </div>
@@ -535,6 +728,7 @@ export const SubmitPropertyPage: React.FC = () => {
                       required
                       value={contactPhone}
                       onChange={(e) => setContactPhone(e.target.value)}
+                      placeholder="010XXXXXXXX"
                       className="w-full px-4 py-2.5 rounded-xl border border-sand-300 text-sm text-navy-900 focus:outline-none focus:ring-2 focus:ring-gold-500/50"
                       dir="ltr"
                     />
@@ -548,6 +742,7 @@ export const SubmitPropertyPage: React.FC = () => {
                       type="email"
                       value={contactEmail}
                       onChange={(e) => setContactEmail(e.target.value)}
+                      placeholder="name@example.com"
                       className="w-full px-4 py-2.5 rounded-xl border border-sand-300 text-sm text-navy-900 focus:outline-none focus:ring-2 focus:ring-gold-500/50"
                       dir="ltr"
                     />
@@ -566,16 +761,27 @@ export const SubmitPropertyPage: React.FC = () => {
               <div className="pt-4 border-t border-sand-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <span className="text-xs text-navy-500">
                   {language === 'ar'
-                    ? 'بالضغط على إرسال، فإنك توافق على شروط النشر والمراجعة الإدارية.'
+                    ? 'بالضغط على إرسال، فإنك توافق على مراجعة الإدارة واعتماد النشر.'
                     : 'By submitting, you agree to review and publication standards.'}
                 </span>
 
                 <button
                   type="submit"
-                  className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-navy-950 font-black text-sm shadow-lg shadow-gold-500/25 transition-all flex items-center justify-center gap-2"
+                  disabled={isSubmitting || isUploadingImage}
+                  className={`w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-navy-950 font-black text-sm shadow-lg shadow-gold-500/25 transition-all flex items-center justify-center gap-2 ${
+                    isSubmitting || isUploadingImage ? 'opacity-60 cursor-not-allowed' : ''
+                  }`}
                 >
                   <PlusCircle className="w-5 h-5 stroke-[2.5]" />
-                  <span>{language === 'ar' ? 'إرسال العقار للمراجعة والاعتماد' : 'Submit Listing for Approval'}</span>
+                  <span>
+                    {isSubmitting
+                      ? language === 'ar'
+                        ? 'جارٍ حفظ وإرسال العقار...'
+                        : 'Submitting listing...'
+                      : language === 'ar'
+                      ? 'إرسال العقار للمراجعة والاعتماد'
+                      : 'Submit Listing for Approval'}
+                  </span>
                 </button>
               </div>
             </form>
