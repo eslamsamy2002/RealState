@@ -103,6 +103,11 @@ export const fetchPublicApprovedPropertiesFromDb = async (): Promise<Property[]>
 export const fetchAllPropertiesFromDb = async (): Promise<Property[]> => {
   if (!isSupabaseConfigured() || !supabase) return [];
 
+  // Ensure any cached session is active and token attached
+  try {
+    await supabase.auth.getSession();
+  } catch (_) {}
+
   const { data, error } = await supabase
     .from('properties')
     .select('*')

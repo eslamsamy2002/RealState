@@ -66,6 +66,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (_) {}
 
+    // 3. Fallback verification for designated admin emails
+    if (
+      user.email &&
+      ['admin@darestate.local', 'admin@elhamd.local', ADMIN_EMAIL.toLowerCase()].includes(
+        user.email.toLowerCase()
+      )
+    ) {
+      return true;
+    }
+
     return false;
   };
 
@@ -141,7 +151,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
 
         if (error) {
-          // If login fails in Supabase, also check local admin for convenience
+          // If credentials are invalid, return clear error directly
+          if (error.message === 'Invalid login credentials') {
+            return {
+              success: false,
+              error: 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+            };
+          }
+
+          // If network / connection error, allow offline local fallback for development
           const matchedLocal = localUsers.find(
             (u) => u.email.toLowerCase() === cleanEmail && u.password === cleanPassword
           );
@@ -160,9 +178,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
           return {
             success: false,
-            error: error.message === 'Invalid login credentials'
-              ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة.'
-              : error.message,
+            error: error.message,
           };
         }
 

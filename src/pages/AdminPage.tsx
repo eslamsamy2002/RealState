@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -56,6 +56,11 @@ export const AdminPage: React.FC = () => {
 
   const { language } = useLanguage();
   const { currentUser, logout } = useAuth();
+
+  // Always fetch latest submissions and data from Supabase when Admin page mounts
+  useEffect(() => {
+    refreshCloudData();
+  }, [refreshCloudData]);
 
   // Active Admin Sub-tab
   const [activeTab, setActiveTab] = useState<
@@ -426,7 +431,26 @@ export const AdminPage: React.FC = () => {
 
             {/* Submissions List */}
             <div className="space-y-4">
-              {filteredProperties.map((prop) => (
+              {filteredProperties.length === 0 ? (
+                <div className="bg-white rounded-3xl border border-dashed border-sand-300 p-12 text-center">
+                  <Building2 className="w-12 h-12 text-sand-400 mx-auto mb-3" />
+                  <h4 className="font-bold text-navy-950 text-base mb-1">
+                    {submissionFilter === 'pending'
+                      ? (language === 'ar' ? 'لا توجد عقارات في انتظار المراجعة حالياً' : 'No pending properties')
+                      : (language === 'ar' ? 'لا توجد عقارات مطابقة للتصفية الحالية' : 'No matching properties')}
+                  </h4>
+                  <p className="text-xs text-navy-500 max-w-sm mx-auto">
+                    {submissionFilter === 'pending'
+                      ? (language === 'ar'
+                          ? 'كافة العقارات المرسلة تمت مراجعتها، وستظهر العقارات الجديدة للزوار هنا فور إرسالها.'
+                          : 'All submissions have been reviewed.')
+                      : (language === 'ar'
+                          ? 'جرّب اختيار "الكل" لعرض كافة العقارات المسجلة بالمنصة.'
+                          : 'Try selecting "All" to view all platform listings.')}
+                  </p>
+                </div>
+              ) : (
+                filteredProperties.map((prop) => (
                 <div
                   key={prop.id}
                   className="bg-white rounded-3xl border border-sand-200 p-5 shadow-card flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6"
@@ -525,7 +549,8 @@ export const AdminPage: React.FC = () => {
                     </button>
                   </div>
                 </div>
-              ))}
+              ))
+              )}
             </div>
           </div>
         )}

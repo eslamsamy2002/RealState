@@ -3,7 +3,7 @@ export const STORAGE_KEYS = {
   INQUIRIES: 'elhamd_inquiries_v2',
   LEGAL_SERVICES: 'elhamd_legal_services_v2',
   LEGAL_REQUESTS: 'elhamd_legal_requests_v2',
-  INVESTMENTS: 'elhamd_investments_v2',
+  INVESTMENTS: 'elhamd_investments_v3',
   INVESTMENT_INQUIRIES: 'elhamd_investment_inquiries_v2',
   USER_PROFILE: 'elhamd_user_profile_v2',
   LANGUAGE: 'elhamd_language_v2',

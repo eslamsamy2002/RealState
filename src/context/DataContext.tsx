@@ -137,7 +137,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Investment Shares Concept State
   const [investments] = useState<InvestmentShare[]>(() => {
-    return getFromStorage<InvestmentShare[]>(STORAGE_KEYS.INVESTMENTS, INITIAL_INVESTMENTS);
+    const list = getFromStorage<InvestmentShare[]>(STORAGE_KEYS.INVESTMENTS, INITIAL_INVESTMENTS);
+    return (list || []).filter(
+      (inv) =>
+        inv.id !== 'inv-ps-1' &&
+        !inv.title?.includes('الثلاثيني') &&
+        !inv.titleEn?.toLowerCase().includes('thalatheny')
+    );
   });
 
   // Investment Inquiries State
@@ -208,7 +214,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Error syncing with Supabase:', err);
       }
     }
-  }, [isAdmin]);
+  }, [isAdmin, authUser?.id, authUser?.role]);
 
   // Initial cloud sync on mount and when admin changes
   useEffect(() => {
@@ -276,8 +282,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setProperties((prev) => [newProperty, ...prev]);
 
-    if (cloudStatus.isConnected) {
-      await insertPropertySubmissionToDb(newProperty);
+    if (isSupabaseConfigured()) {
+      const saved = await insertPropertySubmissionToDb(newProperty);
+      if (!saved) {
+        console.error('Failed to save property to Supabase');
+      }
     }
 
     return newProperty;
@@ -286,7 +295,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addPropertyDirectly = async (property: Property) => {
     setProperties((prev) => [property, ...prev]);
 
-    if (cloudStatus.isConnected) {
+    if (isSupabaseConfigured()) {
       await insertPropertyDirectlyToDb(property);
     }
   };
@@ -294,7 +303,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateProperty = async (updated: Property) => {
     setProperties((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
 
-    if (cloudStatus.isConnected) {
+    if (isSupabaseConfigured()) {
       await updatePropertyInDb(updated);
     }
   };
@@ -304,7 +313,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       prev.map((p) => (p.id === id ? { ...p, status: 'approved', rejectionReason: undefined } : p))
     );
 
-    if (cloudStatus.isConnected) {
+    if (isSupabaseConfigured()) {
       await updatePropertyStatusInDb(id, 'approved');
     }
   };
@@ -315,7 +324,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       prev.map((p) => (p.id === id ? { ...p, status: 'rejected', rejectionReason: cleanReason } : p))
     );
 
-    if (cloudStatus.isConnected) {
+    if (isSupabaseConfigured()) {
       await updatePropertyStatusInDb(id, 'rejected', cleanReason);
     }
   };
@@ -323,7 +332,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteProperty = async (id: string) => {
     setProperties((prev) => prev.filter((p) => p.id !== id));
 
-    if (cloudStatus.isConnected) {
+    if (isSupabaseConfigured()) {
       await deletePropertyFromDb(id);
     }
   };
@@ -349,7 +358,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setInquiries((prev) => [newInquiry, ...prev]);
 
-    if (cloudStatus.isConnected) {
+    if (isSupabaseConfigured()) {
       await insertInquiryToDb(newInquiry);
     }
 
@@ -359,7 +368,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateInquiryStatus = async (id: string, status: Inquiry['status']) => {
     setInquiries((prev) => prev.map((inq) => (inq.id === id ? { ...inq, status } : inq)));
 
-    if (cloudStatus.isConnected) {
+    if (isSupabaseConfigured()) {
       await updateInquiryStatusInDb(id, status);
     }
   };
@@ -367,7 +376,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const deleteInquiry = async (id: string) => {
     setInquiries((prev) => prev.filter((inq) => inq.id !== id));
 
-    if (cloudStatus.isConnected) {
+    if (isSupabaseConfigured()) {
       await deleteInquiryFromDb(id);
     }
   };
@@ -410,7 +419,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setLegalRequests((prev) => [newRequest, ...prev]);
 
-    if (cloudStatus.isConnected) {
+    if (isSupabaseConfigured()) {
       await insertLegalRequestToDb(newRequest);
     }
 
@@ -420,7 +429,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateLegalRequestStatus = async (id: string, status: LegalRequest['status']) => {
     setLegalRequests((prev) => prev.map((req) => (req.id === id ? { ...req, status } : req)));
 
-    if (cloudStatus.isConnected) {
+    if (isSupabaseConfigured()) {
       await updateLegalRequestStatusInDb(id, status);
     }
   };
@@ -442,7 +451,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setInvestmentInquiries((prev) => [newInquiry, ...prev]);
 
-    if (cloudStatus.isConnected) {
+    if (isSupabaseConfigured()) {
       await insertInvestmentInquiryToDb(newInquiry);
     }
 
@@ -457,7 +466,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       prev.map((inv) => (inv.id === id ? { ...inv, status } : inv))
     );
 
-    if (cloudStatus.isConnected) {
+    if (isSupabaseConfigured()) {
       await updateInvestmentInquiryStatusInDb(id, status);
     }
   };
